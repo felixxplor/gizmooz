@@ -19,6 +19,11 @@ export default async function handleRequest(
       checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN,
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
     },
+    connectSrc: [
+      'https://cdn.shopify.com',
+      'https://shopify.com',
+      'https://d3e33eb8b59a.ngrok-free.app/',
+    ],
   });
 
   const body = await renderToReadableStream(

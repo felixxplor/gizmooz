@@ -1,4 +1,4 @@
-import type {Route} from './+types/account_.login';
+import type {Route} from '../+types/root';
 
 export async function loader({request, context}: Route.LoaderArgs) {
   return context.customerAccount.login({
