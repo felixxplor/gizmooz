@@ -1,44 +1,87 @@
-import {redirect, useLoaderData} from 'react-router';
-import type {Route} from './+types/collections.$handle';
+import {redirect, useLoaderData, useSearchParams, useNavigate} from 'react-router';
 import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
-import {ProductItem} from '~/components/ProductItem';
 import type {ProductItemFragment} from 'storefrontapi.generated';
+import {CollectionHeader} from '~/components/collection/CollectionHeader';
+import {CollectionBreadcrumbs} from '~/components/collection/CollectionBreadcrumbs';
+import {CollectionToolbar} from '~/components/collection/CollectionToolbar';
+import {FilterSidebar} from '~/components/collection/FilterSidebar';
+import {MobileFilterDrawer} from '~/components/collection/MobileFilterDrawer';
+import {ProductCard} from '~/components/collection/ProductCard';
+import type {Route} from '../+types/root';
+import {useState} from 'react';
 
 export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: `Hydrogen | ${data?.collection.title ?? ''} Collection`}];
+  return [{title: `Gizmooz | ${data?.collection.title ?? ''} Collection`}];
 };
 
+function getSortValuesFromParam(sort: string | null) {
+  switch (sort) {
+    case 'price-low-high':
+      return {sortKey: 'PRICE', reverse: false};
+    case 'price-high-low':
+      return {sortKey: 'PRICE', reverse: true};
+    case 'best-selling':
+      return {sortKey: 'BEST_SELLING', reverse: false};
+    case 'newest':
+      return {sortKey: 'CREATED', reverse: true};
+    case 'featured':
+    default:
+      return {sortKey: 'COLLECTION_DEFAULT', reverse: false};
+  }
+}
+
+function buildProductFilters(searchParams: URLSearchParams) {
+  const filters: any[] = [];
+
+  const available = searchParams.get('available');
+  if (available === 'true') {
+    filters.push({available: true});
+  }
+
+  const priceMin = searchParams.get('price_min');
+  const priceMax = searchParams.get('price_max');
+  if (priceMin || priceMax) {
+    const priceFilter: any = {};
+    if (priceMin) priceFilter.min = parseFloat(priceMin);
+    if (priceMax) priceFilter.max = parseFloat(priceMax);
+    filters.push({price: priceFilter});
+  }
+
+  return filters.length > 0 ? filters : undefined;
+}
+
 export async function loader(args: Route.LoaderArgs) {
-  // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
-
   return {...deferredData, ...criticalData};
 }
 
-/**
- * Load data necessary for rendering content above the fold. This is the critical data
- * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
- */
 async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   const {handle} = params;
   const {storefront} = context;
   const paginationVariables = getPaginationVariables(request, {
-    pageBy: 8,
+    pageBy: 12,
   });
 
   if (!handle) {
     throw redirect('/collections');
   }
 
+  const url = new URL(request.url);
+  const {sortKey, reverse} = getSortValuesFromParam(url.searchParams.get('sort'));
+  const filters = buildProductFilters(url.searchParams);
+
   const [{collection}] = await Promise.all([
     storefront.query(COLLECTION_QUERY, {
-      variables: {handle, ...paginationVariables},
-      // Add other queries here, so that they are loaded in parallel
+      variables: {
+        handle,
+        sortKey,
+        reverse,
+        filters,
+        ...paginationVariables,
+      },
     }),
   ]);
 
@@ -48,7 +91,6 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     });
   }
 
-  // The API handle might be localized, so redirect to the localized handle
   redirectIfHandleIsLocalized(request, {handle, data: collection});
 
   return {
@@ -56,34 +98,91 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   };
 }
 
-/**
- * Load data for rendering content below the fold. This data is deferred and will be
- * fetched after the initial page load. If it's unavailable, the page should still 200.
- * Make sure to not throw any errors here, as it will cause the page to 500.
- */
 function loadDeferredData({context}: Route.LoaderArgs) {
   return {};
 }
 
 export default function Collection() {
   const {collection} = useLoaderData<typeof loader>();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [showDesktopFilters, setShowDesktopFilters] = useState(false);
+  const [gridCols, setGridCols] = useState<3 | 4>(4);
+
+  const sortBy = searchParams.get('sort') || 'featured';
+
+  const activeFilterCount = [
+    searchParams.get('available'),
+    searchParams.get('price_min'),
+    searchParams.get('price_max'),
+  ].filter(Boolean).length;
+
+  const handleSortChange = (value: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (value === 'featured') {
+      params.delete('sort');
+    } else {
+      params.set('sort', value);
+    }
+    navigate(`?${params.toString()}`, {replace: true});
+  };
 
   return (
-    <div className="collection">
-      <h1>{collection.title}</h1>
-      <p className="collection-description">{collection.description}</p>
-      <PaginatedResourceSection<ProductItemFragment>
-        connection={collection.products}
-        resourcesClassName="products-grid"
-      >
-        {({node: product, index}) => (
-          <ProductItem
-            key={product.id}
-            product={product}
-            loading={index < 8 ? 'eager' : undefined}
+    <div className="min-h-screen bg-white">
+      <CollectionHeader collection={collection} />
+
+      <div className="section-container py-8">
+        <CollectionBreadcrumbs collectionTitle={collection.title} />
+
+        <CollectionToolbar
+          productCount={collection.products.nodes.length}
+          showFilters={showDesktopFilters}
+          onToggleFilters={() => {
+            setShowDesktopFilters(!showDesktopFilters);
+            setShowMobileFilters(!showMobileFilters);
+          }}
+          sortBy={sortBy}
+          onSortChange={handleSortChange}
+          gridCols={gridCols}
+          onGridChange={setGridCols}
+          activeFilterCount={activeFilterCount}
+        />
+
+        <div className="flex gap-8">
+          {/* Desktop Sidebar Filters */}
+          {showDesktopFilters && (
+            <aside className="hidden lg:block w-64 flex-shrink-0">
+              <FilterSidebar />
+            </aside>
+          )}
+
+          {/* Mobile Filter Drawer */}
+          <MobileFilterDrawer
+            isOpen={showMobileFilters}
+            onClose={() => setShowMobileFilters(false)}
           />
-        )}
-      </PaginatedResourceSection>
+
+          {/* Products Grid */}
+          <div className="flex-1">
+            <PaginatedResourceSection<ProductItemFragment>
+              connection={collection.products}
+              resourcesClassName={`grid grid-cols-2 ${
+                gridCols === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'
+              } gap-6`}
+            >
+              {({node: product, index}) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  loading={index < 8 ? 'eager' : undefined}
+                />
+              )}
+            </PaginatedResourceSection>
+          </div>
+        </div>
+      </div>
+
       <Analytics.CollectionView
         data={{
           collection: {
@@ -105,6 +204,7 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
     id
     handle
     title
+    availableForSale
     featuredImage {
       id
       altText
@@ -123,7 +223,6 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
   }
 ` as const;
 
-// NOTE: https://shopify.dev/docs/api/storefront/2022-04/objects/collection
 const COLLECTION_QUERY = `#graphql
   ${PRODUCT_ITEM_FRAGMENT}
   query Collection(
@@ -134,6 +233,9 @@ const COLLECTION_QUERY = `#graphql
     $last: Int
     $startCursor: String
     $endCursor: String
+    $sortKey: ProductCollectionSortKeys
+    $reverse: Boolean
+    $filters: [ProductFilter!]
   ) @inContext(country: $country, language: $language) {
     collection(handle: $handle) {
       id
@@ -144,7 +246,10 @@ const COLLECTION_QUERY = `#graphql
         first: $first,
         last: $last,
         before: $startCursor,
-        after: $endCursor
+        after: $endCursor,
+        sortKey: $sortKey,
+        reverse: $reverse,
+        filters: $filters
       ) {
         nodes {
           ...ProductItem

@@ -7,6 +7,8 @@ import type {
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
 import type {ProductFragment} from 'storefrontapi.generated';
+import {useState} from 'react';
+import {Minus, Plus} from 'lucide-react';
 
 export function ProductForm({
   productOptions,
@@ -17,15 +19,18 @@ export function ProductForm({
 }) {
   const navigate = useNavigate();
   const {open} = useAside();
+  const [quantity, setQuantity] = useState(1);
+
   return (
-    <div className="product-form">
+    <div className="space-y-6">
       {productOptions.map((option) => {
-        // If there is only a single value in the option values, don't display the option
         if (option.optionValues.length === 1) return null;
 
         return (
-          <div className="product-options" key={option.name}>
-            <h5>{option.name}</h5>
+          <div key={option.name}>
+            <h5 className="text-sm font-bold text-brand-900 mb-3">
+              {option.name}
+            </h5>
             <div className="product-options-grid">
               {option.optionValues.map((value) => {
                 const {
@@ -40,10 +45,6 @@ export function ProductForm({
                 } = value;
 
                 if (isDifferentProduct) {
-                  // SEO
-                  // When the variant is a combined listing child product
-                  // that leads to a different url, we need to render it
-                  // as an anchor tag
                   return (
                     <Link
                       className="product-options-item"
@@ -54,20 +55,16 @@ export function ProductForm({
                       to={`/products/${handle}?${variantUriQuery}`}
                       style={{
                         border: selected
-                          ? '1px solid black'
-                          : '1px solid transparent',
+                          ? '2px solid var(--color-brand-900)'
+                          : '2px solid transparent',
                         opacity: available ? 1 : 0.3,
+                        textDecoration: !available ? 'line-through' : 'none',
                       }}
                     >
                       <ProductOptionSwatch swatch={swatch} name={name} />
                     </Link>
                   );
                 } else {
-                  // SEO
-                  // When the variant is an update to the search param,
-                  // render it as a button with javascript navigating to
-                  // the variant so that SEO bots do not index these as
-                  // duplicated links
                   return (
                     <button
                       type="button"
@@ -77,9 +74,10 @@ export function ProductForm({
                       key={option.name + name}
                       style={{
                         border: selected
-                          ? '1px solid black'
-                          : '1px solid transparent',
+                          ? '2px solid var(--color-brand-900)'
+                          : '2px solid transparent',
                         opacity: available ? 1 : 0.3,
+                        textDecoration: !available && exists ? 'line-through' : 'none',
                       }}
                       disabled={!exists}
                       onClick={() => {
@@ -97,10 +95,37 @@ export function ProductForm({
                 }
               })}
             </div>
-            <br />
           </div>
         );
       })}
+
+      {/* Quantity Selector */}
+      <div>
+        <h5 className="text-sm font-bold text-brand-900 mb-3">Quantity</h5>
+        <div className="inline-flex items-center border-2 border-brand-300 rounded-lg">
+          <button
+            type="button"
+            aria-label="Decrease quantity"
+            disabled={quantity <= 1}
+            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+            className="w-11 h-11 flex items-center justify-center hover:bg-brand-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <Minus className="w-4 h-4" />
+          </button>
+          <span className="min-w-[3rem] text-center font-semibold text-brand-900">
+            {quantity}
+          </span>
+          <button
+            type="button"
+            aria-label="Increase quantity"
+            onClick={() => setQuantity((q) => q + 1)}
+            className="w-11 h-11 flex items-center justify-center hover:bg-brand-100 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
       <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {
@@ -111,14 +136,14 @@ export function ProductForm({
             ? [
                 {
                   merchandiseId: selectedVariant.id,
-                  quantity: 1,
+                  quantity,
                   selectedVariant,
                 },
               ]
             : []
         }
       >
-        {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
+        {selectedVariant?.availableForSale ? 'Add to Cart' : 'Sold Out'}
       </AddToCartButton>
     </div>
   );

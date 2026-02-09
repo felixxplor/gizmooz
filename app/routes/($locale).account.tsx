@@ -7,6 +7,7 @@ import {
 } from 'react-router';
 import type {Route} from './+types/account';
 import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
+import {User, Package, MapPin, LogOut, ChevronRight} from 'lucide-react';
 
 export function shouldRevalidate() {
   return true;
@@ -39,59 +40,113 @@ export default function AccountLayout() {
 
   const heading = customer
     ? customer.firstName
-      ? `Welcome, ${customer.firstName}`
-      : `Welcome to your account.`
+      ? `Welcome back, ${customer.firstName}!`
+      : `Welcome to your account`
     : 'Account Details';
 
   return (
-    <div className="account">
-      <h1>{heading}</h1>
-      <br />
-      <AccountMenu />
-      <br />
-      <br />
-      <Outlet context={{customer}} />
+    <div className="min-h-screen bg-brand-50">
+      {/* Header */}
+      <div className="bg-brand-900 py-12">
+        <div className="section-container">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white">
+            {heading}
+          </h1>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="section-container py-12">
+        <div className="grid lg:grid-cols-4 gap-8">
+          {/* Sidebar Navigation */}
+          <aside className="lg:col-span-1">
+            <AccountMenu />
+          </aside>
+
+          {/* Main Content */}
+          <main className="lg:col-span-3">
+            <Outlet context={{customer}} />
+          </main>
+        </div>
+      </div>
     </div>
   );
 }
 
 function AccountMenu() {
-  function isActiveStyle({
-    isActive,
-    isPending,
-  }: {
-    isActive: boolean;
-    isPending: boolean;
-  }) {
-    return {
-      fontWeight: isActive ? 'bold' : undefined,
-      color: isPending ? 'grey' : 'black',
-    };
-  }
+  const menuItems = [
+    {
+      to: '/account/orders',
+      icon: Package,
+      label: 'Orders',
+      description: 'View order history',
+    },
+    {
+      to: '/account/profile',
+      icon: User,
+      label: 'Profile',
+      description: 'Edit personal info',
+    },
+    {
+      to: '/account/addresses',
+      icon: MapPin,
+      label: 'Addresses',
+      description: 'Manage addresses',
+    },
+  ];
 
   return (
-    <nav role="navigation">
-      <NavLink to="/account/orders" style={isActiveStyle}>
-        Orders &nbsp;
-      </NavLink>
-      &nbsp;|&nbsp;
-      <NavLink to="/account/profile" style={isActiveStyle}>
-        &nbsp; Profile &nbsp;
-      </NavLink>
-      &nbsp;|&nbsp;
-      <NavLink to="/account/addresses" style={isActiveStyle}>
-        &nbsp; Addresses &nbsp;
-      </NavLink>
-      &nbsp;|&nbsp;
-      <Logout />
+    <nav className="space-y-2">
+      {menuItems.map((item) => {
+        const Icon = item.icon;
+        return (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            className={({isActive}) =>
+              `flex items-center justify-between p-4 rounded-lg transition-all ${
+                isActive
+                  ? 'bg-brand-900 text-white'
+                  : 'bg-white text-brand-600 hover:bg-brand-100 hover:text-brand-900'
+              }`
+            }
+          >
+            {({isActive}) => (
+              <>
+                <div className="flex items-center gap-3">
+                  <Icon className="w-5 h-5" />
+                  <div>
+                    <p className="font-semibold">{item.label}</p>
+                    <p
+                      className={`text-xs ${isActive ? 'text-brand-300' : 'text-brand-400'}`}
+                    >
+                      {item.description}
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5" />
+              </>
+            )}
+          </NavLink>
+        );
+      })}
+
+      {/* Logout */}
+      <Form method="POST" action="/account/logout">
+        <button
+          type="submit"
+          className="w-full flex items-center justify-between p-4 rounded-lg bg-white text-brand-600 hover:bg-red-50 hover:text-error transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <LogOut className="w-5 h-5" />
+            <div>
+              <p className="font-semibold">Sign Out</p>
+              <p className="text-xs text-brand-400">Logout from account</p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5" />
+        </button>
+      </Form>
     </nav>
-  );
-}
-
-function Logout() {
-  return (
-    <Form className="account-logout" method="POST" action="/account/logout">
-      &nbsp;<button type="submit">Sign out</button>
-    </Form>
   );
 }

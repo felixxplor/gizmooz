@@ -5,6 +5,7 @@ import {
   useEffect,
   useState,
 } from 'react';
+import {X} from 'lucide-react';
 
 type AsideType = 'search' | 'cart' | 'mobile' | 'closed';
 type AsideContextValue = {
@@ -13,16 +14,6 @@ type AsideContextValue = {
   close: () => void;
 };
 
-/**
- * A side bar component with Overlay
- * @example
- * ```jsx
- * <Aside type="search" heading="SEARCH">
- *  <input type="search" />
- *  ...
- * </Aside>
- * ```
- */
 export function Aside({
   children,
   heading,
@@ -53,22 +44,37 @@ export function Aside({
   }, [close, expanded]);
 
   return (
-    <div
-      aria-modal
-      className={`overlay ${expanded ? 'expanded' : ''}`}
-      role="dialog"
-    >
-      <button className="close-outside" onClick={close} />
-      <aside>
-        <header>
-          <h3>{heading}</h3>
-          <button className="close reset" onClick={close} aria-label="Close">
-            &times;
+    <>
+      {/* Backdrop */}
+      <div
+        className={`fixed inset-0 bg-black/50 z-[60] transition-opacity duration-300 ${
+          expanded ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={close}
+      />
+
+      {/* Drawer */}
+      <aside
+        className={`fixed top-0 right-0 bottom-0 w-full sm:w-[400px] lg:w-[480px] bg-white shadow-2xl z-[70] transform transition-transform duration-300 ease-in-out flex flex-col ${
+          expanded ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        {/* Header */}
+        <header className="flex items-center justify-between px-6 py-5 border-b border-brand-200">
+          <div className="flex-1">{heading}</div>
+          <button
+            onClick={close}
+            className="p-2 hover:bg-brand-100 rounded-full transition-colors"
+            aria-label="Close"
+          >
+            <X className="w-6 h-6" />
           </button>
         </header>
-        <main>{children}</main>
+
+        {/* Content */}
+        <main className="flex-1 overflow-hidden">{children}</main>
       </aside>
-    </div>
+    </>
   );
 }
 

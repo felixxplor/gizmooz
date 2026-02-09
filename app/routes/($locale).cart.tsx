@@ -3,18 +3,19 @@ import type {Route} from './+types/cart';
 import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
+import {RecommendedProducts} from '~/components/RecommendedProducts';
+import {Link} from 'react-router';
+import {ArrowLeft} from 'lucide-react';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: `Hydrogen | Cart`}];
+  return [{title: `Gizmooz | Shopping Cart`}];
 };
 
 export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
 
 export async function action({request, context}: Route.ActionArgs) {
   const {cart} = context;
-
   const formData = await request.formData();
-
   const {action, inputs} = CartForm.getFormInput(formData);
 
   if (!action) {
@@ -36,29 +37,19 @@ export async function action({request, context}: Route.ActionArgs) {
       break;
     case CartForm.ACTIONS.DiscountCodesUpdate: {
       const formDiscountCode = inputs.discountCode;
-
-      // User inputted discount code
       const discountCodes = (
         formDiscountCode ? [formDiscountCode] : []
       ) as string[];
-
-      // Combine discount codes already applied on cart
       discountCodes.push(...inputs.discountCodes);
-
       result = await cart.updateDiscountCodes(discountCodes);
       break;
     }
     case CartForm.ACTIONS.GiftCardCodesUpdate: {
       const formGiftCardCode = inputs.giftCardCode;
-
-      // User inputted gift card code
       const giftCardCodes = (
         formGiftCardCode ? [formGiftCardCode] : []
       ) as string[];
-
-      // Combine gift card codes already applied on cart
       giftCardCodes.push(...inputs.giftCardCodes);
-
       result = await cart.updateGiftCardCodes(giftCardCodes);
       break;
     }
@@ -102,16 +93,85 @@ export async function action({request, context}: Route.ActionArgs) {
 
 export async function loader({context}: Route.LoaderArgs) {
   const {cart} = context;
-  return await cart.get();
+
+  // Load cart and recommended products
+  const [cartData, recommendedProducts] = await Promise.all([
+    cart.get(),
+    context.storefront
+      .query(RECOMMENDED_PRODUCTS_QUERY)
+      .catch((error: Error) => {
+        console.error(error);
+        return null;
+      }),
+  ]);
+
+  return {
+    cart: cartData,
+    recommendedProducts,
+  };
 }
 
 export default function Cart() {
-  const cart = useLoaderData<typeof loader>();
+  const {cart: cartData, recommendedProducts} = useLoaderData<typeof loader>();
+
+  // Ensure cart is null instead of undefined
+  const cart = cartData || null;
 
   return (
-    <div className="cart">
-      <h1>Cart</h1>
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <div className="bg-brand-900 py-8">
+        <div className="section-container">
+          <Link
+            to="/collections/all"
+            className="inline-flex items-center gap-2 text-white hover:opacity-80 transition-opacity mb-4"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Continue Shopping
+          </Link>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white">
+            Shopping Cart
+          </h1>
+        </div>
+      </div>
+
+      {/* Cart Content */}
       <CartMain layout="page" cart={cart} />
+
+      {/* Recommended Products */}
+      <RecommendedProducts
+        products={Promise.resolve(recommendedProducts)}
+        title="Complete Your Order"
+      />
     </div>
   );
 }
+
+const RECOMMENDED_PRODUCTS_QUERY = `#graphql
+  fragment RecommendedProduct on Product {
+    id
+    title
+    handle
+    priceRange {
+      minVariantPrice {
+        amount
+        currencyCode
+      }
+    }
+    featuredImage {
+      id
+      url
+      altText
+      width
+      height
+    }
+  }
+  query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
+    @inContext(country: $country, language: $language) {
+    products(first: 4, sortKey: BEST_SELLING) {
+      nodes {
+        ...RecommendedProduct
+      }
+    }
+  }
+` as const;

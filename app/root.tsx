@@ -9,6 +9,7 @@ import {
   Scripts,
   ScrollRestoration,
   useRouteLoaderData,
+  Link,
 } from 'react-router';
 import type {Route} from './+types/root';
 import favicon from '~/assets/favicon.svg';
@@ -17,6 +18,10 @@ import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from './components/PageLayout';
+import {ArrowLeft, Home, Package, Search} from 'lucide-react';
+import {Footer} from './components/Footer';
+import {Header} from './components/Header';
+import {Aside} from './components/Aside';
 
 export type RootLoader = typeof loader;
 
@@ -187,25 +192,230 @@ export default function App() {
 
 export function ErrorBoundary() {
   const error = useRouteError();
-  let errorMessage = 'Unknown error';
-  let errorStatus = 500;
+
+  // Safe header/footer props for error pages
+  const safeHeader = {
+    shop: {
+      name: 'Gizmooz',
+      primaryDomain: {url: 'https://gizmooz.com'},
+    },
+    menu: null,
+  };
+
+  const safeFooter = Promise.resolve(null);
 
   if (isRouteErrorResponse(error)) {
-    errorMessage = error?.data?.message ?? error.data;
-    errorStatus = error.status;
-  } else if (error instanceof Error) {
-    errorMessage = error.message;
+    if (error.status === 404) {
+      return (
+        <html lang="en">
+          <head>
+            <meta charSet="utf-8" />
+            <meta
+              name="viewport"
+              content="width=device-width,initial-scale=1"
+            />
+            <title>404 - Page Not Found | Gizmooz</title>
+            <Meta />
+            <Links />
+          </head>
+          <body>
+            <Aside.Provider>
+              <Header
+                header={safeHeader as any}
+                cart={Promise.resolve(null)}
+                isLoggedIn={Promise.resolve(false)}
+                publicStoreDomain="gizmooz.com"
+              />
+              <NotFoundPage />
+              <Footer
+                footer={safeFooter}
+                header={safeHeader as any}
+                publicStoreDomain="gizmooz.com"
+              />
+            </Aside.Provider>
+            <ScrollRestoration />
+            <Scripts />
+          </body>
+        </html>
+      );
+    }
+
+    // Other error statuses
+    return (
+      <html lang="en">
+        <head>
+          <meta charSet="utf-8" />
+          <meta name="viewport" content="width=device-width,initial-scale=1" />
+          <title>
+            {error.status} - {error.statusText} | Gizmooz
+          </title>
+          <Meta />
+          <Links />
+        </head>
+        <body>
+          <Aside.Provider>
+            <Header
+              header={safeHeader as any}
+              cart={Promise.resolve(null)}
+              isLoggedIn={Promise.resolve(false)}
+              publicStoreDomain="gizmooz.com"
+            />
+            <GenericErrorPage
+              status={error.status}
+              statusText={error.statusText}
+            />
+            <Footer
+              footer={safeFooter}
+              header={safeHeader as any}
+              publicStoreDomain="gizmooz.com"
+            />
+          </Aside.Provider>
+          <ScrollRestoration />
+          <Scripts />
+        </body>
+      </html>
+    );
   }
 
+  // Unknown errors
   return (
-    <div className="route-error">
-      <h1>Oops</h1>
-      <h2>{errorStatus}</h2>
-      {errorMessage && (
-        <fieldset>
-          <pre>{errorMessage}</pre>
-        </fieldset>
-      )}
-    </div>
+    <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Error | Gizmooz</title>
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        <Aside.Provider>
+          <Header
+            header={safeHeader as any}
+            cart={Promise.resolve(null)}
+            isLoggedIn={Promise.resolve(false)}
+            publicStoreDomain="gizmooz.com"
+          />
+          <GenericErrorPage status={500} statusText="Internal Server Error" />
+          <Footer
+            footer={safeFooter}
+            header={safeHeader as any}
+            publicStoreDomain="gizmooz.com"
+          />
+        </Aside.Provider>
+        <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
+function NotFoundPage() {
+  return (
+    <main className="min-h-screen bg-brand-900 flex items-center justify-center px-4 py-16">
+      <div className="max-w-2xl w-full text-center">
+        <div className="mb-8">
+          <h1 className="text-[150px] sm:text-[200px] font-bold text-white/10 leading-none">
+            404
+          </h1>
+        </div>
+
+        <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+          Page Not Found
+        </h2>
+        <p className="text-lg text-brand-300 mb-12 max-w-md mx-auto">
+          The page you&apos;re looking for doesn&apos;t exist. It might have
+          been moved or deleted.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+          <Link
+            to="/"
+            className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-brand-900 font-bold rounded-lg hover:bg-brand-100 transition-all"
+          >
+            <Home className="w-5 h-5" />
+            Back to Home
+          </Link>
+          <Link
+            to="/collections/all"
+            className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-white text-white font-bold rounded-lg hover:bg-white/10 transition-all"
+          >
+            <Package className="w-5 h-5" />
+            Shop Products
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Link
+            to="/collections/smart-home"
+            className="p-6 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-all text-center"
+          >
+            <Package className="w-8 h-8 text-white/60 mb-3 mx-auto" />
+            <h3 className="text-white font-semibold mb-1">Smart Home</h3>
+            <p className="text-sm text-brand-300">Explore smart devices</p>
+          </Link>
+
+          <Link
+            to="/search"
+            className="p-6 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-all text-center"
+          >
+            <Search className="w-8 h-8 text-white/60 mb-3 mx-auto" />
+            <h3 className="text-white font-semibold mb-1">Search</h3>
+            <p className="text-sm text-brand-300">Find what you need</p>
+          </Link>
+
+          <Link
+            to="/pages/contact"
+            className="p-6 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-all text-center"
+          >
+            <ArrowLeft className="w-8 h-8 text-white/60 mb-3 mx-auto" />
+            <h3 className="text-white font-semibold mb-1">Contact Us</h3>
+            <p className="text-sm text-brand-300">Get in touch</p>
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function GenericErrorPage({
+  status,
+  statusText,
+}: {
+  status: number;
+  statusText: string;
+}) {
+  return (
+    <main className="min-h-screen bg-white flex items-center justify-center px-4 py-16">
+      <div className="text-center max-w-2xl">
+        <div className="mb-8">
+          <h1 className="text-[120px] sm:text-[150px] font-bold text-brand-200 leading-none">
+            {status}
+          </h1>
+        </div>
+
+        <h2 className="text-3xl sm:text-4xl font-bold text-brand-900 mb-4">
+          {statusText}
+        </h2>
+        <p className="text-lg text-brand-500 mb-8">
+          We&apos;re sorry, but something unexpected happened.
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link
+            to="/"
+            className="btn-primary px-8 py-4 inline-flex items-center justify-center gap-2"
+          >
+            <Home className="w-5 h-5" />
+            Back to Home
+          </Link>
+          <Link
+            to="/pages/contact"
+            className="btn-secondary px-8 py-4 inline-flex items-center justify-center gap-2"
+          >
+            Contact Support
+          </Link>
+        </div>
+      </div>
+    </main>
   );
 }
