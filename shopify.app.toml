@@ -1,0 +1,16 @@
+name = "Hydrogen Reviews"
+client_id = "2f9d641a5080f375dab56049b31ac392"
+application_url = "https://example.com"
+embedded = true
+
+[access_scopes]
+scopes = "write_metaobjects,read_metaobjects,write_files,read_files,write_products,read_products"
+
+[auth]
+redirect_urls = ["https://example.com/auth/callback"]
+
+[webhooks]
+api_version = "2026-01"
+
+[pos]
+embedded = false

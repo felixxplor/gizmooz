@@ -46,47 +46,13 @@ export function ProductGallery({images, productTitle}: ProductGalleryProps) {
   }
 
   return (
-    <div className="space-y-4" onKeyDown={handleKeyDown}>
-      {/* Main Image */}
-      <div className="relative aspect-square bg-brand-50 rounded-lg overflow-hidden">
-        <Image
-          data={images[currentIndex]}
-          className="w-full h-full object-cover"
-          sizes="(min-width: 1024px) 50vw, 100vw"
-          fetchpriority={currentIndex === 0 ? 'high' : undefined}
-        />
-
-        {/* Navigation Arrows - always visible */}
-        {images.length > 1 && (
-          <>
-            <button
-              onClick={prevImage}
-              aria-label="Previous image"
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-md flex items-center justify-center transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={nextImage}
-              aria-label="Next image"
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white rounded-full shadow-md flex items-center justify-center transition-colors"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </>
-        )}
-
-        {/* Image Counter */}
-        {images.length > 1 && (
-          <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
-            {currentIndex + 1} / {images.length}
-          </div>
-        )}
-      </div>
-
-      {/* Thumbnail Grid */}
+    <div
+      className="flex gap-3"
+      onKeyDown={handleKeyDown}
+    >
+      {/* Vertical Thumbnails */}
       {images.length > 1 && (
-        <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+        <div className="flex flex-col gap-2 w-16 shrink-0">
           {images.map((image, index) => (
             <button
               key={image.id}
@@ -94,19 +60,52 @@ export function ProductGallery({images, productTitle}: ProductGalleryProps) {
               aria-label={`View image ${index + 1}`}
               className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                 index === currentIndex
-                  ? 'border-brand-900 scale-95'
-                  : 'border-brand-200 hover:border-brand-300'
+                  ? 'border-brand-900'
+                  : 'border-transparent hover:border-brand-300'
               }`}
             >
               <Image
                 data={image}
                 className="w-full h-full object-cover"
-                sizes="100px"
+                sizes="64px"
               />
             </button>
           ))}
         </div>
       )}
+
+      {/* Main Image */}
+      <div className="relative flex-1 aspect-square bg-brand-50 rounded-lg overflow-hidden">
+        <Image
+          data={images[currentIndex]}
+          className="w-full h-full object-cover"
+          sizes="(min-width: 1024px) 45vw, 100vw"
+          fetchpriority={currentIndex === 0 ? 'high' : undefined}
+        />
+
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={prevImage}
+              aria-label="Previous image"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white rounded-full shadow-md flex items-center justify-center transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={nextImage}
+              aria-label="Next image"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 hover:bg-white rounded-full shadow-md flex items-center justify-center transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+
+            <div className="absolute bottom-3 right-3 bg-black/70 text-white px-2.5 py-0.5 rounded-full text-xs">
+              {currentIndex + 1} / {images.length}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

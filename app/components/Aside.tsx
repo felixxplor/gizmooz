@@ -47,6 +47,8 @@ export function Aside({
     <>
       {/* Backdrop */}
       <div
+        aria-hidden={!expanded}
+        style={expanded ? undefined : {opacity: 0, pointerEvents: 'none'}}
         className={`fixed inset-0 bg-black/50 z-[60] transition-opacity duration-300 ${
           expanded ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
@@ -55,12 +57,14 @@ export function Aside({
 
       {/* Drawer */}
       <aside
-        className={`fixed top-0 right-0 bottom-0 w-full sm:w-[400px] lg:w-[480px] bg-white shadow-2xl z-[70] transform transition-transform duration-300 ease-in-out flex flex-col ${
+        aria-hidden={!expanded}
+        style={expanded ? undefined : {transform: 'translateX(100%)'}}
+        className={`fixed top-0 right-0 bottom-0 w-[80vw] sm:w-[400px] lg:w-[480px] bg-white shadow-2xl z-[70] transform transition-transform duration-300 ease-in-out flex flex-col ${
           expanded ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         {/* Header */}
-        <header className="flex items-center justify-between px-6 py-5 border-b border-brand-200">
+        <header className="flex items-center justify-between px-4 py-4 border-b border-brand-200">
           <div className="flex-1">{heading}</div>
           <button
             onClick={close}

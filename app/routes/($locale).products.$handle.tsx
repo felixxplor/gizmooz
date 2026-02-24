@@ -1,4 +1,5 @@
 import {redirect, useLoaderData} from 'react-router';
+import {useState} from 'react';
 import type {Route} from './+types/products.$handle';
 import {
   getSelectedProductOptions,
@@ -9,16 +10,26 @@ import {
   useSelectedOptionInUrlParam,
 } from '@shopify/hydrogen';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import {parseMetaobjectReviews} from '~/lib/reviews';
 import {ProductGallery} from '~/components/product/ProductGallery';
 import {ProductInfo} from '~/components/product/ProductInfo';
 import {ProductTabs} from '~/components/product/ProductTabs';
+import {ProductFeatureHighlights} from '~/components/product/ProductFeatureHighlights';
+import {ProductReviews} from '~/components/product/ProductReviews';
 import {RecommendedProducts} from '~/components/RecommendedProducts';
 import {Link} from 'react-router';
 import {ProductForm} from '~/components/ProductForm';
+import {Store, RotateCcw, Plus, Minus} from 'lucide-react';
+import {CartForm, Money, Image} from '@shopify/hydrogen';
+import {useAside} from '~/components/Aside';
+import {type FetcherWithComponents} from 'react-router';
+import afterpayLogo from '~/assets/Afterpay.svg';
+import paypalLogo from '~/assets/PayPal.svg';
+import zipLogo from '~/assets/Zip.svg';
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [
-    {title: `Gizmooz | ${data?.product.title ?? ''}`},
+    {title: `Gizmody | ${data?.product.title ?? ''}`},
     {
       rel: 'canonical',
       href: `/products/${data?.product.handle}`,
@@ -52,9 +63,9 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 
   redirectIfHandleIsLocalized(request, {handle, data: product});
 
-  return {
-    product,
-  };
+  const reviews = parseMetaobjectReviews(product);
+
+  return {product, reviews};
 }
 
 function loadDeferredData({context}: Route.LoaderArgs) {
@@ -71,14 +82,22 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 }
 
 export default function Product() {
-  const {product, recommendedProducts} = useLoaderData<typeof loader>();
+  const {product, recommendedProducts, reviews} =
+    useLoaderData<typeof loader>();
+  const [quantity, setQuantity] = useState(1);
 
   const selectedVariant = useOptimisticVariant(
     product.selectedOrFirstAvailableVariant,
     getAdjacentAndFirstAvailableVariants(product),
   );
 
-  useSelectedOptionInUrlParam(selectedVariant.selectedOptions);
+  // Only sync options to URL if the product has real options (not just "Default Title")
+  const hasRealOptions = selectedVariant.selectedOptions.some(
+    (opt) => !(opt.name === 'Title' && opt.value === 'Default Title'),
+  );
+  useSelectedOptionInUrlParam(
+    hasRealOptions ? selectedVariant.selectedOptions : [],
+  );
 
   const productOptions = getProductOptions({
     ...product,
@@ -98,10 +117,7 @@ export default function Product() {
         >
           <ol className="flex items-center gap-2">
             <li>
-              <Link
-                to="/"
-                className="hover:text-brand-900 transition-colors"
-              >
+              <Link to="/" className="hover:text-brand-900 transition-colors">
                 Home
               </Link>
             </li>
@@ -124,34 +140,91 @@ export default function Product() {
         </nav>
 
         {/* Product Grid */}
-        <div className="grid lg:grid-cols-2 gap-12">
-          {/* Left: Image Gallery */}
-          <ProductGallery images={images} productTitle={product.title} />
+        <div className="grid lg:grid-cols-2 gap-12 items-start">
+          {/* Left: Image Gallery — sticky so it stays in view while right column scrolls */}
+          <div className="sticky top-32">
+            <ProductGallery images={images} productTitle={product.title} />
+          </div>
 
           {/* Right: Product Info */}
           <div>
             <ProductInfo
               title={product.title}
-              vendor={product.vendor}
               price={selectedVariant?.price}
               compareAtPrice={selectedVariant?.compareAtPrice}
+              reviewAverage={reviews?.average}
+              reviewCount={reviews?.total}
             />
 
             <div className="mt-8 space-y-8">
               <ProductForm
                 productOptions={productOptions}
                 selectedVariant={selectedVariant}
+                quantity={quantity}
+                setQuantity={setQuantity}
               />
 
-              {/* Product Description Preview */}
-              {product.description && (
-                <div className="border-t border-brand-200 pt-6">
-                  <p className="text-brand-600 leading-relaxed">
-                    {product.description.substring(0, 200)}
-                    {product.description.length > 200 ? '...' : ''}
+              {/* Shipping & Returns */}
+              <div className="space-y-4 border-t border-brand-200 pt-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded bg-brand-100 flex items-center justify-center flex-shrink-0">
+                    <Store className="w-4 h-4 text-brand-900" />
+                  </div>
+                  <p className="text-sm font-semibold text-brand-900">
+                    Sold &amp; shipped by Gizmody
                   </p>
                 </div>
-              )}
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded bg-brand-100 flex items-center justify-center flex-shrink-0">
+                    <RotateCcw className="w-4 h-4 text-brand-900" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-brand-900">
+                      30 day change of mind returns.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Options */}
+              <div className="grid grid-cols-3 gap-4 border-t border-brand-200 pt-6">
+                <div className="space-y-2">
+                  <img src={afterpayLogo} alt="Afterpay" className="h-6" />
+                  <p className="text-xs text-brand-600">
+                    4 payments of{' '}
+                    <span className="font-semibold">
+                      $
+                      {selectedVariant?.price
+                        ? (
+                            parseFloat(selectedVariant.price.amount) / 4
+                          ).toFixed(2)
+                        : '0.00'}
+                    </span>
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <img src={paypalLogo} alt="PayPal Pay in 4" className="h-6" />
+                  <p className="text-xs text-brand-600">
+                    4 payments of{' '}
+                    <span className="font-semibold">
+                      $
+                      {selectedVariant?.price
+                        ? (
+                            parseFloat(selectedVariant.price.amount) / 4
+                          ).toFixed(2)
+                        : '0.00'}
+                    </span>
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <img src={zipLogo} alt="Zip" className="h-6" />
+                  <p className="text-xs text-brand-600">
+                    From <span className="font-semibold">$10/week</span>
+                  </p>
+                </div>
+              </div>
+
+              <ProductFeatureHighlights />
             </div>
           </div>
         </div>
@@ -162,6 +235,9 @@ export default function Product() {
           descriptionHtml={product.descriptionHtml}
         />
       </div>
+
+      {/* Reviews */}
+      <ProductReviews data={reviews} productId={product.id} />
 
       {/* Recommended Products */}
       <RecommendedProducts
@@ -184,6 +260,122 @@ export default function Product() {
           ],
         }}
       />
+
+      {/* Sticky Bottom Bar */}
+      <StickyAddToCart
+        product={product}
+        selectedVariant={selectedVariant}
+        quantity={quantity}
+        setQuantity={setQuantity}
+      />
+    </div>
+  );
+}
+
+function StickyAddToCart({
+  product,
+  selectedVariant,
+  quantity,
+  setQuantity,
+}: {
+  product: any;
+  selectedVariant: any;
+  quantity: number;
+  setQuantity: (qty: number | ((prev: number) => number)) => void;
+}) {
+  const {open} = useAside();
+
+  if (!selectedVariant) return null;
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-brand-200 shadow-[0_-4px_12px_rgba(0,0,0,0.08)] z-40">
+      <div className="section-container py-3 flex items-center gap-4">
+        {/* Product Image & Info */}
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          {selectedVariant.image && (
+            <div className="w-12 h-12 rounded-lg overflow-hidden bg-brand-50 shrink-0">
+              <Image
+                data={selectedVariant.image}
+                className="w-full h-full object-cover"
+                width={48}
+                height={48}
+              />
+            </div>
+          )}
+          <div className="min-w-0">
+            <h4 className="text-sm font-semibold text-brand-900 truncate">
+              {product.title}
+            </h4>
+            {selectedVariant.title !== 'Default Title' && (
+              <p className="text-xs text-brand-500 truncate">
+                {selectedVariant.title}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Price */}
+        <div className="shrink-0">
+          <Money
+            data={selectedVariant.price}
+            className="text-lg font-bold text-brand-900"
+          />
+        </div>
+
+        {/* Quantity Selector */}
+        <div className="flex items-center border-2 border-brand-300 rounded-lg shrink-0">
+          <button
+            type="button"
+            aria-label="Decrease quantity"
+            disabled={quantity <= 1}
+            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+            className="w-9 h-9 flex items-center justify-center hover:bg-brand-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <Minus className="w-3.5 h-3.5" />
+          </button>
+          <span className="min-w-8 text-center text-sm font-semibold">
+            {quantity}
+          </span>
+          <button
+            type="button"
+            aria-label="Increase quantity"
+            onClick={() => setQuantity((q) => q + 1)}
+            className="w-9 h-9 flex items-center justify-center hover:bg-brand-100 transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Add to Cart */}
+        <CartForm
+          route="/cart"
+          action={CartForm.ACTIONS.LinesAdd}
+          inputs={{
+            lines: [{merchandiseId: selectedVariant.id, quantity}],
+          }}
+        >
+          {(fetcher: FetcherWithComponents<any>) => {
+            const isAdding = fetcher.state !== 'idle';
+            return (
+              <button
+                type="submit"
+                disabled={!selectedVariant.availableForSale || isAdding}
+                onClick={() => open('cart')}
+                className="shrink-0 btn-primary py-3 px-6 text-sm rounded-full cursor-pointer disabled:cursor-not-allowed"
+              >
+                {!selectedVariant.availableForSale
+                  ? 'SOLD OUT'
+                  : isAdding
+                    ? 'ADDING...'
+                    : 'ADD TO CART'}
+                {selectedVariant.availableForSale && !isAdding && (
+                  <Plus className="w-4 h-4" />
+                )}
+              </button>
+            );
+          }}
+        </CartForm>
+      </div>
     </div>
   );
 }
@@ -271,6 +463,29 @@ const PRODUCT_FRAGMENT = `#graphql
       description
       title
     }
+    metafield(namespace: "custom", key: "reviews") {
+      references(first: 20) {
+        nodes {
+          ... on Metaobject {
+            id
+            fields {
+              key
+              value
+              reference {
+                ... on MediaImage {
+                  image {
+                    url
+                    altText
+                    width
+                    height
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
   ${PRODUCT_VARIANT_FRAGMENT}
 ` as const;
@@ -294,7 +509,18 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
     id
     title
     handle
+    availableForSale
     priceRange {
+      minVariantPrice {
+        amount
+        currencyCode
+      }
+      maxVariantPrice {
+        amount
+        currencyCode
+      }
+    }
+    compareAtPriceRange {
       minVariantPrice {
         amount
         currencyCode
@@ -306,6 +532,32 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
       altText
       width
       height
+    }
+    variants(first: 1) {
+      nodes {
+        id
+        availableForSale
+        price {
+          amount
+          currencyCode
+        }
+        compareAtPrice {
+          amount
+          currencyCode
+        }
+      }
+    }
+    metafield(namespace: "custom", key: "reviews") {
+      references(first: 50) {
+        nodes {
+          ... on Metaobject {
+            fields {
+              key
+              value
+            }
+          }
+        }
+      }
     }
   }
   query RecommendedProducts ($country: CountryCode, $language: LanguageCode)

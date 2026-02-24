@@ -5,9 +5,10 @@ import {FilterSidebar} from './FilterSidebar';
 interface MobileFilterDrawerProps {
   isOpen: boolean;
   onClose: () => void;
+  collections?: Array<{handle: string; title: string}>;
 }
 
-export function MobileFilterDrawer({isOpen, onClose}: MobileFilterDrawerProps) {
+export function MobileFilterDrawer({isOpen, onClose, collections}: MobileFilterDrawerProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -51,7 +52,7 @@ export function MobileFilterDrawer({isOpen, onClose}: MobileFilterDrawerProps) {
             <X className="w-6 h-6" />
           </button>
         </div>
-        <FilterSidebar />
+        <FilterSidebar collections={collections} />
       </div>
     </div>
   );

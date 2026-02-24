@@ -1,9 +1,8 @@
-import {Link} from 'react-router';
+import {Link, useFetchers} from 'react-router';
 import {CartForm, Image, Money} from '@shopify/hydrogen';
-import type {CartLineUpdateInput} from '@shopify/hydrogen/storefront-api-types';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
-import {Trash2, Plus, Minus} from 'lucide-react';
+import {Trash2, Plus, Minus, Tag, Loader} from 'lucide-react';
 
 type CartLine = CartApiQueryFragment['lines']['nodes'][0];
 type CartMainProps = {
@@ -19,23 +18,26 @@ export function CartLineItem({
 }) {
   const {id, merchandise} = line;
   const {product, title, image, selectedOptions} = merchandise;
+
+  if (!product?.handle || !line.cost?.totalAmount) return null;
+
   const lineItemUrl = `/products/${product.handle}`;
   const {close} = useAside();
 
   return (
-    <li className="flex gap-4 py-6 border-b border-brand-200 last:border-b-0">
+    <li className="flex gap-3 py-4 border-b border-brand-200 last:border-b-0">
       <Link
         to={lineItemUrl}
         onClick={layout === 'aside' ? close : undefined}
         className="flex-shrink-0"
       >
         {image && (
-          <div className="w-24 h-24 rounded-lg overflow-hidden bg-brand-50">
+          <div className="w-20 h-20 rounded-lg overflow-hidden bg-brand-50">
             <Image
               data={image}
               className="w-full h-full object-cover"
-              width={96}
-              height={96}
+              width={80}
+              height={80}
             />
           </div>
         )}
@@ -47,7 +49,7 @@ export function CartLineItem({
           onClick={layout === 'aside' ? close : undefined}
           className="block"
         >
-          <h3 className="font-semibold text-brand-900 hover:text-accent-600 transition-colors line-clamp-2">
+          <h3 className="font-semibold text-sm text-brand-900 hover:text-accent-600 transition-colors line-clamp-2 leading-tight">
             {product.title}
           </h3>
         </Link>
@@ -60,17 +62,76 @@ export function CartLineItem({
           ))}
         </div>
 
-        <div className="mt-3 flex items-center justify-between">
-          <Money
-            data={line.cost.totalAmount}
-            className="text-lg font-bold text-brand-900"
-          />
+        {/* Price & Discount */}
+        {(() => {
+          const discounts = (line as any).discountAllocations || [];
+          const hasDiscount = discounts.length > 0;
+          const originalPrice = line.merchandise.price
+            ? parseFloat(line.merchandise.price.amount) * line.quantity
+            : null;
+          const finalPrice = parseFloat(line.cost.totalAmount.amount);
+          const totalSaved = originalPrice ? originalPrice - finalPrice : 0;
+          const savePercent =
+            originalPrice && totalSaved > 0
+              ? Math.round((totalSaved / originalPrice) * 100)
+              : 0;
 
-          <div className="flex items-center gap-3">
-            <CartLineQuantity line={line} />
-            <CartLineRemoveButton lineIds={[id]} />
-          </div>
-        </div>
+          return (
+            <>
+              {hasDiscount && (
+                <div className="mt-2 space-y-1.5">
+                  {discounts.map((allocation: any, i: number) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-1.5 bg-green-50 px-2.5 py-1.5 rounded-lg"
+                    >
+                      <Tag className="w-3.5 h-3.5 text-green-600 shrink-0" />
+                      <span className="text-xs font-semibold text-green-700">
+                        {allocation.title || allocation.code || 'Discount'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="mt-2">
+                {/* Price */}
+                {hasDiscount && originalPrice ? (
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <Money
+                      data={line.cost.totalAmount}
+                      className="text-base font-bold text-green-600"
+                    />
+                    <span className="text-xs text-brand-400 line-through">
+                      ${originalPrice.toFixed(2)}
+                    </span>
+                    {savePercent > 0 && (
+                      <span className="text-xs font-bold text-white bg-green-600 px-1.5 py-0.5 rounded-full">
+                        -{savePercent}% OFF
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <Money
+                    data={line.cost.totalAmount}
+                    className="text-base font-bold text-brand-900"
+                  />
+                )}
+                {hasDiscount && totalSaved > 0 && (
+                  <p className="text-xs text-green-600 font-semibold">
+                    You save ${totalSaved.toFixed(2)}!
+                  </p>
+                )}
+
+                {/* Qty + Remove — own row so they never overflow */}
+                <div className="flex items-center justify-between mt-2">
+                  <CartLineQuantity line={line} />
+                  <CartLineRemoveButton lineIds={[id]} />
+                </div>
+              </div>
+            </>
+          );
+        })()}
       </div>
     </li>
   );
@@ -79,31 +140,63 @@ export function CartLineItem({
 function CartLineQuantity({line}: {line: CartLine}) {
   if (!line || typeof line?.quantity === 'undefined') return null;
   const {id: lineId, quantity} = line;
-  const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
-  const nextQuantity = Number((quantity + 1).toFixed(0));
+
+  const fetchers = useFetchers();
+  const isUpdating = fetchers.some(
+    (f) =>
+      f.state !== 'idle' &&
+      f.formData?.get('cartFormInput')?.toString().includes(lineId),
+  );
 
   return (
-    <div className="flex items-center gap-2 border-2 border-brand-300 rounded-lg">
-      <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
-        <button
-          aria-label="Decrease quantity"
-          disabled={quantity <= 1}
-          className="w-10 h-10 flex items-center justify-center hover:bg-brand-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          <Minus className="w-4 h-4" />
-        </button>
-      </CartLineUpdateButton>
+    <div
+      className={`flex items-center border-2 rounded-lg transition-opacity ${
+        isUpdating ? 'border-brand-200 opacity-60' : 'border-brand-300'
+      }`}
+    >
+      {/* Decrease */}
+      <CartForm
+        route="/cart"
+        action={CartForm.ACTIONS.LinesUpdate}
+        inputs={{lines: [{id: lineId, quantity: Math.max(0, quantity - 1)}]}}
+      >
+        {(fetcher) => (
+          <button
+            type="submit"
+            aria-label="Decrease quantity"
+            disabled={quantity <= 1 || fetcher.state !== 'idle'}
+            className="w-8 h-8 flex items-center justify-center hover:bg-brand-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <Minus className="w-4 h-4" />
+          </button>
+        )}
+      </CartForm>
 
-      <span className="min-w-[2rem] text-center font-semibold">{quantity}</span>
+      <span className="min-w-[2rem] text-center font-semibold">
+        {isUpdating ? (
+          <Loader className="w-4 h-4 animate-spin mx-auto text-brand-400" />
+        ) : (
+          quantity
+        )}
+      </span>
 
-      <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
-        <button
-          aria-label="Increase quantity"
-          className="w-10 h-10 flex items-center justify-center hover:bg-brand-100 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-        </button>
-      </CartLineUpdateButton>
+      {/* Increase */}
+      <CartForm
+        route="/cart"
+        action={CartForm.ACTIONS.LinesUpdate}
+        inputs={{lines: [{id: lineId, quantity: quantity + 1}]}}
+      >
+        {(fetcher) => (
+          <button
+            type="submit"
+            aria-label="Increase quantity"
+            disabled={fetcher.state !== 'idle'}
+            className="w-8 h-8 flex items-center justify-center hover:bg-brand-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        )}
+      </CartForm>
     </div>
   );
 }
@@ -122,24 +215,6 @@ function CartLineRemoveButton({lineIds}: {lineIds: CartLine['id'][]}) {
       >
         <Trash2 className="w-5 h-5" />
       </button>
-    </CartForm>
-  );
-}
-
-function CartLineUpdateButton({
-  children,
-  lines,
-}: {
-  children: React.ReactNode;
-  lines: CartLineUpdateInput[];
-}) {
-  return (
-    <CartForm
-      route="/cart"
-      action={CartForm.ACTIONS.LinesUpdate}
-      inputs={{lines}}
-    >
-      {children}
     </CartForm>
   );
 }

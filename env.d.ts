@@ -5,3 +5,10 @@
 
 // Enhance TypeScript's built-in typings.
 import '@total-typescript/ts-reset';
+
+declare global {
+  interface Env {
+    SHOPIFY_API_KEY: string;
+    SHOPIFY_API_SECRET: string;
+  }
+}

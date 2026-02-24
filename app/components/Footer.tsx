@@ -1,20 +1,8 @@
 import {Suspense} from 'react';
 import {Await, NavLink, Form} from 'react-router';
 import type {FooterQuery, HeaderQuery} from 'storefrontapi.generated';
-import {
-  Facebook,
-  Twitter,
-  Youtube,
-  Instagram,
-  Mail,
-  Phone,
-  Shield,
-  Truck,
-  RotateCcw,
-  Award,
-  ShoppingBag,
-  Sparkles,
-} from 'lucide-react';
+import {Facebook, Twitter, Youtube, Instagram} from 'lucide-react';
+import logo from '~/assets/logo.svg';
 
 interface FooterProps {
   footer: Promise<FooterQuery | null>;
@@ -32,93 +20,15 @@ export function Footer({
       <Await resolve={footerPromise}>
         {(footer) => (
           <footer className="bg-white">
-            {/* Features Section */}
-            <div className="bg-brand-900 text-white py-12">
-              <div className="section-container">
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                  <div className="text-center md:text-left">
-                    <div className="flex justify-center md:justify-start mb-3">
-                      <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
-                        <ShoppingBag className="w-6 h-6" />
-                      </div>
-                    </div>
-                    <h3 className="font-bold text-sm mb-2">Premium Quality</h3>
-                    <p className="text-xs leading-relaxed text-brand-300">
-                      For over 5 years, Gizmooz&apos;s mission has remained the
-                      same &mdash; to deliver premium smart technology.
-                    </p>
-                  </div>
-
-                  <div className="text-center md:text-left">
-                    <div className="flex justify-center md:justify-start mb-3">
-                      <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
-                        <Award className="w-6 h-6" />
-                      </div>
-                    </div>
-                    <h3 className="font-bold text-sm mb-2">
-                      Certified Excellence
-                    </h3>
-                    <p className="text-xs leading-relaxed text-brand-300">
-                      We are the trusted leaders in premium tech, dedicated to
-                      innovation and quality.
-                    </p>
-                  </div>
-
-                  <div className="text-center md:text-left">
-                    <div className="flex justify-center md:justify-start mb-3">
-                      <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
-                        <Shield className="w-6 h-6" />
-                      </div>
-                    </div>
-                    <h3 className="font-bold text-sm mb-2">
-                      2-5 Year Warranty
-                    </h3>
-                    <p className="text-xs leading-relaxed text-brand-300">
-                      Every product is covered by an industry-leading 2-year or
-                      5-year warranty.
-                    </p>
-                  </div>
-
-                  <div className="text-center md:text-left">
-                    <div className="flex justify-center md:justify-start mb-3">
-                      <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
-                        <Truck className="w-6 h-6" />
-                      </div>
-                    </div>
-                    <h3 className="font-bold text-sm mb-2">
-                      Fast & Secure Shipping
-                    </h3>
-                    <p className="text-xs leading-relaxed text-brand-300">
-                      Orders ship the same or next day, with package protection
-                      for peace of mind.
-                    </p>
-                  </div>
-
-                  <div className="text-center md:text-left">
-                    <div className="flex justify-center md:justify-start mb-3">
-                      <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
-                        <RotateCcw className="w-6 h-6" />
-                      </div>
-                    </div>
-                    <h3 className="font-bold text-sm mb-2">60 Day Guarantee</h3>
-                    <p className="text-xs leading-relaxed text-brand-300">
-                      We offer a 60-day trial period to make sure you love your
-                      new gear.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* Newsletter Section */}
-            <div className="bg-brand-800 text-white py-16">
+            <div className="bg-linear-to-r from-accent-100 via-purple-50 to-indigo-100 py-8 sm:py-16">
               <div className="section-container">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-8">
                   <div className="text-center md:text-left max-w-xl">
-                    <h2 className="text-2xl sm:text-3xl font-bold mb-3">
+                    <h2 className="text-xl sm:text-3xl font-bold text-brand-900 mb-1 sm:mb-3">
                       Sign Up For Our Newsletter
                     </h2>
-                    <p className="text-sm text-brand-300">
+                    <p className="text-xs sm:text-sm text-brand-500">
                       Be the first to know about exclusive deals, limited time
                       offers, and new arrivals.
                     </p>
@@ -127,7 +37,7 @@ export function Footer({
                     <Form
                       method="post"
                       action="/newsletter"
-                      className="flex gap-0"
+                      className="flex items-center bg-white rounded-full p-1.5 pl-4 sm:pl-6"
                     >
                       <input
                         type="email"
@@ -135,11 +45,11 @@ export function Footer({
                         placeholder="Enter your email address"
                         required
                         aria-label="Email address"
-                        className="px-6 py-3 rounded-l-lg text-brand-900 placeholder-brand-400 outline-none min-w-[300px] bg-white"
+                        className="flex-1 py-1.5 sm:py-2 text-sm text-brand-900 placeholder-brand-400 outline-none bg-transparent ring-0 shadow-none min-w-0 sm:min-w-52 !border-0 !rounded-none !m-0 !p-0"
                       />
                       <button
                         type="submit"
-                        className="px-8 py-3 bg-accent-600 hover:bg-accent-700 text-white font-bold rounded-r-lg transition-colors whitespace-nowrap"
+                        className="px-4 sm:px-6 py-2 sm:py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold uppercase tracking-wide rounded-full transition-colors whitespace-nowrap"
                       >
                         Subscribe
                       </button>
@@ -150,25 +60,26 @@ export function Footer({
             </div>
 
             {/* Main Footer */}
-            <div className="bg-brand-50 py-12">
+            <div className="bg-brand-50 py-8 sm:py-12">
               <div className="section-container">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-7 gap-6 lg:gap-8">
                   {/* Brand Column */}
-                  <div className="lg:col-span-1">
+                  <div className="lg:col-span-2">
                     <NavLink
                       to="/"
                       prefetch="intent"
-                      className="inline-flex items-center gap-2 mb-4"
+                      className="inline-block mb-3"
                     >
-                      <div className="w-10 h-10 rounded-lg bg-brand-900 flex items-center justify-center">
-                        <Sparkles className="w-6 h-6 text-white" />
-                      </div>
-                      <span className="text-2xl font-display font-bold text-brand-900">
-                        GIZMOOZ
-                      </span>
+                      <img
+                        src={logo}
+                        alt="Gizmody"
+                        width={144}
+                        height={48}
+                        className="h-9 sm:h-12 w-auto"
+                      />
                     </NavLink>
 
-                    <div className="flex gap-2 mb-4">
+                    <div className="flex gap-2 mb-3">
                       <a
                         href="https://facebook.com"
                         target="_blank"
@@ -209,36 +120,29 @@ export function Footer({
 
                     <div className="space-y-2 text-sm">
                       <a
-                        href="mailto:info@gizmooz.com"
+                        href="mailto:info@gizmody.com"
                         className="block text-brand-500 hover:text-brand-900 transition-colors"
                       >
-                        info@gizmooz.com
+                        info@gizmody.com
                       </a>
                       <a
-                        href="mailto:support@gizmooz.com"
+                        href="mailto:support@gizmody.com"
                         className="block text-brand-500 hover:text-brand-900 transition-colors"
                       >
-                        support@gizmooz.com
+                        support@gizmody.com
                       </a>
                     </div>
-
-                    <NavLink
-                      to="/pages/contact"
-                      prefetch="intent"
-                      className="mt-4 inline-block"
-                    >
-                      <button className="btn-primary px-6 py-2 text-sm">
-                        Contact Us
-                      </button>
-                    </NavLink>
                   </div>
+
+                  {/* Link Columns — 2-col grid on mobile, individual cells on lg */}
+                  <div className="grid grid-cols-2 gap-6 lg:contents">
 
                   {/* Shop Column */}
                   <div>
-                    <h4 className="font-bold text-brand-900 mb-4 text-sm uppercase tracking-wide">
+                    <h4 className="font-bold text-brand-900 mb-3 sm:mb-4 text-xs sm:text-sm uppercase tracking-wide">
                       Shop
                     </h4>
-                    <ul className="space-y-2.5 text-sm">
+                    <ul className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
                       <li>
                         <NavLink
                           to="/collections/smart-home"
@@ -266,15 +170,7 @@ export function Footer({
                           Audio
                         </NavLink>
                       </li>
-                      <li>
-                        <NavLink
-                          to="/collections/computing"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Computing
-                        </NavLink>
-                      </li>
+
                       <li>
                         <NavLink
                           to="/collections/accessories"
@@ -293,24 +189,15 @@ export function Footer({
                           Sale
                         </NavLink>
                       </li>
-                      <li>
-                        <NavLink
-                          to="/gift-cards"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Gift Cards
-                        </NavLink>
-                      </li>
                     </ul>
                   </div>
 
                   {/* Company Column */}
                   <div>
-                    <h4 className="font-bold text-brand-900 mb-4 text-sm uppercase tracking-wide">
+                    <h4 className="font-bold text-brand-900 mb-3 sm:mb-4 text-xs sm:text-sm uppercase tracking-wide">
                       Company
                     </h4>
-                    <ul className="space-y-2.5 text-sm">
+                    <ul className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
                       <li>
                         <NavLink
                           to="/pages/about"
@@ -322,29 +209,11 @@ export function Footer({
                       </li>
                       <li>
                         <NavLink
-                          to="/pages/ambassadors"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Ambassadors
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
                           to="/blogs/news"
                           prefetch="intent"
                           className="text-brand-500 hover:text-brand-900 transition-colors"
                         >
                           Press
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
-                          to="/pages/retail"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Retail Store
                         </NavLink>
                       </li>
                       <li>
@@ -361,10 +230,10 @@ export function Footer({
 
                   {/* Support Column */}
                   <div>
-                    <h4 className="font-bold text-brand-900 mb-4 text-sm uppercase tracking-wide">
+                    <h4 className="font-bold text-brand-900 mb-3 sm:mb-4 text-xs sm:text-sm uppercase tracking-wide">
                       Support
                     </h4>
-                    <ul className="space-y-2.5 text-sm">
+                    <ul className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
                       <li>
                         <NavLink
                           to="/pages/help"
@@ -372,6 +241,15 @@ export function Footer({
                           className="text-brand-500 hover:text-brand-900 transition-colors"
                         >
                           Help Center
+                        </NavLink>
+                      </li>
+                      <li>
+                        <NavLink
+                          to="/pages/tracking"
+                          prefetch="intent"
+                          className="text-brand-500 hover:text-brand-900 transition-colors"
+                        >
+                          Track Orders
                         </NavLink>
                       </li>
                       <li>
@@ -401,33 +279,15 @@ export function Footer({
                           Warranty
                         </NavLink>
                       </li>
-                      <li>
-                        <NavLink
-                          to="/pages/giveaways"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Giveaways
-                        </NavLink>
-                      </li>
                     </ul>
                   </div>
 
                   {/* Resources Column */}
                   <div>
-                    <h4 className="font-bold text-brand-900 mb-4 text-sm uppercase tracking-wide">
+                    <h4 className="font-bold text-brand-900 mb-3 sm:mb-4 text-xs sm:text-sm uppercase tracking-wide">
                       Resources
                     </h4>
-                    <ul className="space-y-2.5 text-sm">
-                      <li>
-                        <NavLink
-                          to="/pages/learn"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Learn
-                        </NavLink>
-                      </li>
+                    <ul className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
                       <li>
                         <NavLink
                           to="/pages/tech-guide"
@@ -437,24 +297,7 @@ export function Footer({
                           Tech Guide
                         </NavLink>
                       </li>
-                      <li>
-                        <NavLink
-                          to="/pages/product-finder"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Product Finder
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
-                          to="/pages/financing"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Financing
-                        </NavLink>
-                      </li>
+
                       <li>
                         <NavLink
                           to="/pages/videos"
@@ -476,9 +319,11 @@ export function Footer({
                     </ul>
                   </div>
 
+                  </div>{/* end link columns wrapper */}
+
                   {/* Secure Payments Column */}
-                  <div>
-                    <h4 className="font-bold text-brand-900 mb-4 text-sm uppercase tracking-wide">
+                  <div className="col-span-1 lg:col-span-1">
+                    <h4 className="font-bold text-brand-900 mb-3 sm:mb-4 text-xs sm:text-sm uppercase tracking-wide">
                       Secure Payments
                     </h4>
                     <div className="grid grid-cols-3 gap-2">
@@ -705,17 +550,8 @@ export function Footer({
             <div className="bg-white border-t border-brand-200 py-6">
               <div className="section-container">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-brand-500">
-                  <div className="flex flex-wrap justify-center gap-4">
-                    {footer?.menu && (
-                      <FooterMenu
-                        menu={footer.menu}
-                        primaryDomainUrl={header.shop.primaryDomain.url}
-                        publicStoreDomain={publicStoreDomain}
-                      />
-                    )}
-                  </div>
                   <p className="text-center">
-                    Copyright © {new Date().getFullYear()} Gizmooz. All Rights
+                    Copyright © {new Date().getFullYear()} Gizmody. All Rights
                     Reserved
                   </p>
                 </div>

@@ -4,13 +4,16 @@ import type {Route} from '../+types/root';
 import {HeroWithProduct} from '~/components/home/HeroWithProduct';
 import {BestSellers} from '~/components/home/BestSellers';
 import {CategoryImageGrid} from '~/components/home/CategoryImageGrid';
+import {LogoCarousel} from '~/components/home/LogoCarousel';
 import {MissionSection} from '~/components/home/MissionSection';
 import {PressMentions} from '~/components/home/PressMentions';
 import {InstagramGallery} from '~/components/home/InstagramGallery';
 import {LatestBlogs} from '~/components/home/LatestBlogs';
+import {Testimonials} from '~/components/home/Testimonials';
+import {ShopWithConfidence} from '~/components/home/ShopWithConfidence';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: 'Gizmooz | Premium Smart Technology'}];
+  return [{title: 'Gizmody | Premium Smart Technology'}];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -57,17 +60,18 @@ export default function Homepage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <HeroWithProduct product={data.featuredProduct} />
+      <HeroWithProduct />
       <BestSellers products={data.recommendedProducts} />
       <CategoryImageGrid collections={data.collections} />
+      <LogoCarousel />
       <MissionSection />
       <PressMentions />
       <InstagramGallery />
+      <Testimonials />
+      <ShopWithConfidence />
       <Suspense>
         <Await resolve={data.blogArticles}>
-          {(result) => (
-            <LatestBlogs articles={result?.blog?.articles?.nodes} />
-          )}
+          {(result) => <LatestBlogs articles={result?.blog?.articles?.nodes} />}
         </Await>
       </Suspense>
     </div>
@@ -146,6 +150,18 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
       nodes {
         id
         availableForSale
+      }
+    }
+    metafield(namespace: "custom", key: "reviews") {
+      references(first: 50) {
+        nodes {
+          ... on Metaobject {
+            fields {
+              key
+              value
+            }
+          }
+        }
       }
     }
   }

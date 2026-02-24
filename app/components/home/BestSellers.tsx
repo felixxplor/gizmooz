@@ -1,8 +1,9 @@
 import {Suspense, useRef} from 'react';
 import {Await, Link} from 'react-router';
 import {Image, Money} from '@shopify/hydrogen';
-import {ChevronLeft, ChevronRight} from 'lucide-react';
+import {ChevronLeft, ChevronRight, Star} from 'lucide-react';
 import {AddToCartButton} from '~/components/AddToCartButton';
+import {useAside} from '~/components/Aside';
 import type {RecommendedProductsQuery} from 'storefrontapi.generated';
 
 interface BestSellersProps {
@@ -75,7 +76,23 @@ function ProductCarousel({products}: {products: any[]}) {
   );
 }
 
+function getReviewStats(product: any): {average: number; count: number} {
+  const nodes = product?.metafield?.references?.nodes ?? [];
+  const ratings = nodes
+    .map((node: any) => {
+      const field = node.fields?.find((f: any) => f.key === 'rating');
+      return field ? parseInt(field.value, 10) : null;
+    })
+    .filter((r: number | null): r is number => r !== null && !isNaN(r));
+  const count = ratings.length;
+  const average = count
+    ? Math.round((ratings.reduce((a: number, b: number) => a + b, 0) / count) * 10) / 10
+    : 0;
+  return {average, count};
+}
+
 function BestSellerCard({product}: {product: any}) {
+  const {open} = useAside();
   const firstVariant = product.variants?.nodes?.[0];
   const price = product.priceRange.minVariantPrice;
   const compareAtPrice = product.compareAtPriceRange?.minVariantPrice;
@@ -85,6 +102,7 @@ function BestSellerCard({product}: {product: any}) {
   const saveAmount = isOnSale
     ? Math.round(parseFloat(compareAtPrice.amount) - parseFloat(price.amount))
     : 0;
+  const {average: reviewAverage, count: reviewCount} = getReviewStats(product);
 
   return (
     <div className="flex-shrink-0 w-[260px] sm:w-[280px] group">
@@ -132,6 +150,20 @@ function BestSellerCard({product}: {product: any}) {
           </div>
         </div>
 
+        {reviewCount > 0 && (
+          <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-0.5">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <Star
+                  key={n}
+                  className={`w-3.5 h-3.5 ${n <= Math.round(reviewAverage) ? 'fill-amber-400 text-amber-400' : 'text-brand-200'}`}
+                />
+              ))}
+            </div>
+            <span className="text-xs text-brand-500">({reviewCount})</span>
+          </div>
+        )}
+
         {/* Add to Cart */}
         {firstVariant ? (
           <AddToCartButton
@@ -142,6 +174,7 @@ function BestSellerCard({product}: {product: any}) {
                 selectedVariant: firstVariant,
               },
             ]}
+            onClick={() => open('cart')}
             className="w-full py-2.5 bg-brand-900 text-white text-xs font-semibold uppercase tracking-wider rounded-full hover:bg-brand-800 transition-colors text-center"
           >
             Add to Cart

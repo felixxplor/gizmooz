@@ -1,14 +1,16 @@
-import {useLoaderData, data, type HeadersFunction} from 'react-router';
+import {useLoaderData, data, type HeadersFunction, Await} from 'react-router';
+import {Suspense} from 'react';
 import type {Route} from './+types/cart';
 import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm} from '@shopify/hydrogen';
+import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import {CartMain} from '~/components/CartMain';
 import {RecommendedProducts} from '~/components/RecommendedProducts';
 import {Link} from 'react-router';
-import {ArrowLeft} from 'lucide-react';
+import {ArrowLeft, ShoppingBag} from 'lucide-react';
 
 export const meta: Route.MetaFunction = () => {
-  return [{title: `Gizmooz | Shopping Cart`}];
+  return [{title: `Gizmody | Shopping Cart`}];
 };
 
 export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
@@ -83,9 +85,7 @@ export async function action({request, context}: Route.ActionArgs) {
       cart: cartResult,
       errors,
       warnings,
-      analytics: {
-        cartId,
-      },
+      analytics: {cartId},
     },
     {status, headers},
   );
@@ -94,54 +94,58 @@ export async function action({request, context}: Route.ActionArgs) {
 export async function loader({context}: Route.LoaderArgs) {
   const {cart} = context;
 
-  // Load cart and recommended products
-  const [cartData, recommendedProducts] = await Promise.all([
-    cart.get(),
-    context.storefront
-      .query(RECOMMENDED_PRODUCTS_QUERY)
-      .catch((error: Error) => {
-        console.error(error);
-        return null;
-      }),
-  ]);
+  const recommendedProducts = context.storefront
+    .query(RECOMMENDED_PRODUCTS_QUERY)
+    .catch((error: Error) => {
+      console.error(error);
+      return null;
+    });
 
-  return {
-    cart: cartData,
-    recommendedProducts,
-  };
+  // cart.get() is NOT awaited — returned as a deferred Promise, exactly like
+  // the root loader.  React Router resolves it via <Await> in the component,
+  // and when the loader revalidates after a cart mutation a brand-new Promise
+  // is created so <Await> re-resolves with the fresh server cart.
+  return {cart: cart.get(), recommendedProducts};
 }
 
 export default function Cart() {
-  const {cart: cartData, recommendedProducts} = useLoaderData<typeof loader>();
-
-  // Ensure cart is null instead of undefined
-  const cart = cartData || null;
+  const {cart: cartPromise, recommendedProducts} =
+    useLoaderData<typeof loader>();
 
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-brand-900 py-8">
+      <div className="bg-brand-50 border-b border-brand-200 py-10 sm:py-14">
         <div className="section-container">
           <Link
             to="/collections/all"
-            className="inline-flex items-center gap-2 text-white hover:opacity-80 transition-opacity mb-4"
+            className="inline-flex items-center gap-1.5 text-brand-500 hover:text-brand-900 transition-colors text-sm font-medium mb-8 group"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
             Continue Shopping
           </Link>
-          <h1 className="text-3xl sm:text-4xl font-bold text-white">
-            Shopping Cart
-          </h1>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-accent-100 flex items-center justify-center shrink-0">
+              <ShoppingBag className="w-6 h-6 sm:w-7 sm:h-7 text-accent-600" />
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-brand-900">
+              Shopping Cart
+            </h1>
+          </div>
         </div>
       </div>
 
-      {/* Cart Content */}
-      <CartMain layout="page" cart={cart} />
+      <Suspense fallback={<CartMain layout="page" cart={null} />}>
+        <Await resolve={cartPromise}>
+          {(cart) => (
+            <CartMain layout="page" cart={cart as CartApiQueryFragment} />
+          )}
+        </Await>
+      </Suspense>
 
-      {/* Recommended Products */}
       <RecommendedProducts
-        products={Promise.resolve(recommendedProducts)}
-        title="Complete Your Order"
+        products={recommendedProducts}
+        title="You May Also Like"
       />
     </div>
   );
@@ -158,12 +162,28 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
         currencyCode
       }
     }
+    compareAtPriceRange {
+      minVariantPrice {
+        amount
+        currencyCode
+      }
+    }
     featuredImage {
       id
       url
       altText
       width
       height
+    }
+    variants(first: 1) {
+      nodes {
+        id
+        availableForSale
+        compareAtPrice {
+          amount
+          currencyCode
+        }
+      }
     }
   }
   query RecommendedProducts ($country: CountryCode, $language: LanguageCode)

@@ -1,6 +1,6 @@
 import {Suspense} from 'react';
-import {Await, Link} from 'react-router';
-import {Image, Money} from '@shopify/hydrogen';
+import {Await} from 'react-router';
+import {ProductCard} from '~/components/collection/ProductCard';
 
 interface RecommendedProductsProps {
   products: Promise<any>;
@@ -28,7 +28,7 @@ export function RecommendedProducts({
               return (
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                   {response.products.nodes.map((product: any) => (
-                    <RecommendedProductCard
+                    <ProductCard
                       key={product.id}
                       product={product}
                     />
@@ -40,39 +40,6 @@ export function RecommendedProducts({
         </Suspense>
       </div>
     </section>
-  );
-}
-
-function RecommendedProductCard({product}: {product: any}) {
-  return (
-    <Link
-      to={`/products/${product.handle}`}
-      prefetch="intent"
-      className="group"
-    >
-      <div className="bg-white rounded-lg overflow-hidden border border-brand-200 hover:shadow-lg transition-shadow">
-        {product.featuredImage && (
-          <div className="aspect-square relative overflow-hidden bg-brand-50">
-            <Image
-              data={product.featuredImage}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
-            />
-          </div>
-        )}
-
-        <div className="p-4">
-          <h3 className="font-semibold text-brand-900 mb-2 group-hover:text-accent-600 transition-colors line-clamp-2">
-            {product.title}
-          </h3>
-
-          <Money
-            data={product.priceRange.minVariantPrice}
-            className="text-lg font-bold text-brand-900"
-          />
-        </div>
-      </div>
-    </Link>
   );
 }
 

@@ -1,81 +1,127 @@
-import {useSearchParams, useNavigate} from 'react-router';
+import {useState, useEffect} from 'react';
+import {useSearchParams, useNavigate, Link} from 'react-router';
 
-export function FilterSidebar() {
+interface FilterSidebarProps {
+  collections?: Array<{handle: string; title: string}>;
+}
+
+export function FilterSidebar({collections}: FilterSidebarProps) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const priceMax = searchParams.get('price_max')
+  const urlPriceMin = searchParams.get('price_min')
+    ? parseInt(searchParams.get('price_min')!)
+    : 0;
+  const urlPriceMax = searchParams.get('price_max')
     ? parseInt(searchParams.get('price_max')!)
     : 1000;
-  const available = searchParams.get('available') === 'true';
 
-  const updateFilter = (key: string, value: string | null) => {
+  const [localPriceMin, setLocalPriceMin] = useState(urlPriceMin);
+  const [localPriceMax, setLocalPriceMax] = useState(urlPriceMax);
+
+  useEffect(() => {
+    setLocalPriceMin(urlPriceMin);
+    setLocalPriceMax(urlPriceMax);
+  }, [urlPriceMin, urlPriceMax]);
+
+  const commitPrice = () => {
     const params = new URLSearchParams(searchParams);
-    if (value === null) {
-      params.delete(key);
+    if (localPriceMin === 0) {
+      params.delete('price_min');
     } else {
-      params.set(key, value);
+      params.set('price_min', String(localPriceMin));
     }
-    navigate(`?${params.toString()}`, {replace: true});
+    if (localPriceMax === 1000) {
+      params.delete('price_max');
+    } else {
+      params.set('price_max', String(localPriceMax));
+    }
+    navigate(`?${params.toString()}`, {replace: true, preventScrollReset: true});
   };
 
   const clearFilters = () => {
     const params = new URLSearchParams(searchParams);
     params.delete('price_min');
     params.delete('price_max');
-    params.delete('available');
-    navigate(`?${params.toString()}`, {replace: true});
+    setLocalPriceMin(0);
+    setLocalPriceMax(1000);
+    navigate(`?${params.toString()}`, {replace: true, preventScrollReset: true});
   };
 
   const hasFilters =
     searchParams.has('price_min') ||
-    searchParams.has('price_max') ||
-    searchParams.has('available');
+    searchParams.has('price_max');
+
+  const handleMinChange = (val: number) => {
+    setLocalPriceMin(Math.min(val, localPriceMax));
+  };
+
+  const handleMaxChange = (val: number) => {
+    setLocalPriceMax(Math.max(val, localPriceMin));
+  };
 
   return (
     <div className="space-y-8">
       {/* Price Range */}
       <div>
         <h3 className="font-bold text-lg mb-4 text-brand-900">Price Range</h3>
-        <div className="space-y-4">
-          <input
-            type="range"
-            min="0"
-            max="1000"
-            step="50"
-            value={priceMax}
-            onChange={(e) =>
-              updateFilter('price_max', e.target.value === '1000' ? null : e.target.value)
-            }
-            className="w-full accent-brand-900"
-            aria-label="Maximum price"
-          />
-          <div className="flex justify-between text-sm text-brand-500">
-            <span>$0</span>
-            <span>${priceMax}</span>
+        <div className="space-y-5">
+          <div>
+            <label className="text-sm text-brand-500 mb-1 block">Min Price</label>
+            <input
+              type="range"
+              min="0"
+              max="1000"
+              step="50"
+              value={localPriceMin}
+              onChange={(e) => handleMinChange(parseInt(e.target.value))}
+              onMouseUp={commitPrice}
+              onTouchEnd={commitPrice}
+              className="w-full accent-brand-900"
+              aria-label="Minimum price"
+            />
+          </div>
+          <div>
+            <label className="text-sm text-brand-500 mb-1 block">Max Price</label>
+            <input
+              type="range"
+              min="0"
+              max="1000"
+              step="50"
+              value={localPriceMax}
+              onChange={(e) => handleMaxChange(parseInt(e.target.value))}
+              onMouseUp={commitPrice}
+              onTouchEnd={commitPrice}
+              className="w-full accent-brand-900"
+              aria-label="Maximum price"
+            />
+          </div>
+          <div className="flex justify-between text-sm font-medium text-brand-700">
+            <span>${localPriceMin}</span>
+            <span>—</span>
+            <span>${localPriceMax}</span>
           </div>
         </div>
       </div>
 
-      {/* Availability */}
-      <div>
-        <h3 className="font-bold text-lg mb-4 text-brand-900">Availability</h3>
-        <div className="space-y-2">
-          <label className="flex items-center gap-3 cursor-pointer group min-h-[44px]">
-            <input
-              type="checkbox"
-              checked={available}
-              onChange={(e) =>
-                updateFilter('available', e.target.checked ? 'true' : null)
-              }
-              className="w-5 h-5 rounded border-2 border-brand-300 text-brand-900 focus:ring-brand-900"
-            />
-            <span className="text-brand-600 group-hover:text-brand-900 transition-colors">
-              In Stock Only
-            </span>
-          </label>
+      {/* Categories */}
+      {collections && collections.length > 0 && (
+        <div>
+          <h3 className="font-bold text-lg mb-4 text-brand-900">Categories</h3>
+          <ul className="space-y-1">
+            {collections.map((col) => (
+              <li key={col.handle}>
+                <Link
+                  to={`/collections/${col.handle}`}
+                  className="block py-2 px-3 rounded-lg text-sm text-brand-600 hover:bg-brand-100 hover:text-brand-900 transition-colors"
+                >
+                  {col.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
+      )}
 
       {/* Reset Filters */}
       {hasFilters && (

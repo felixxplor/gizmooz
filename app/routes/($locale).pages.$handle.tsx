@@ -1,25 +1,18 @@
-import {useLoaderData} from 'react-router';
+import {useLoaderData, Link} from 'react-router';
 import type {Route} from './+types/pages.$handle';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import {CollectionHeader} from '~/components/collection/CollectionHeader';
 
 export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: `Hydrogen | ${data?.page.title ?? ''}`}];
+  return [{title: `Gizmody | ${data?.page.title ?? ''}`}];
 };
 
 export async function loader(args: Route.LoaderArgs) {
-  // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
-
   return {...deferredData, ...criticalData};
 }
 
-/**
- * Load data necessary for rendering content above the fold. This is the critical data
- * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
- */
 async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
   if (!params.handle) {
     throw new Error('Missing page handle');
@@ -31,7 +24,6 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
         handle: params.handle,
       },
     }),
-    // Add other queries here, so that they are loaded in parallel
   ]);
 
   if (!page) {
@@ -45,11 +37,6 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
   };
 }
 
-/**
- * Load data for rendering content below the fold. This data is deferred and will be
- * fetched after the initial page load. If it's unavailable, the page should still 200.
- * Make sure to not throw any errors here, as it will cause the page to 500.
- */
 function loadDeferredData({context}: Route.LoaderArgs) {
   return {};
 }
@@ -58,11 +45,40 @@ export default function Page() {
   const {page} = useLoaderData<typeof loader>();
 
   return (
-    <div className="page">
-      <header>
-        <h1>{page.title}</h1>
-      </header>
-      <main dangerouslySetInnerHTML={{__html: page.body}} />
+    <div className="min-h-screen bg-white">
+      <CollectionHeader collection={{title: page.title}} />
+
+      <div className="section-container py-8">
+        {/* Breadcrumbs */}
+        <nav aria-label="Breadcrumb" className="mb-8">
+          <ol className="flex items-center gap-2 text-sm text-brand-500">
+            <li>
+              <Link to="/" className="hover:text-brand-900 transition-colors">
+                Home
+              </Link>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li>
+              <span className="text-brand-900 font-medium" aria-current="page">
+                {page.title}
+              </span>
+            </li>
+          </ol>
+        </nav>
+
+        {/* CMS Content */}
+        <div
+          className="prose prose-lg max-w-none
+            prose-headings:text-brand-900 prose-headings:font-bold
+            prose-p:text-brand-700 prose-p:leading-relaxed
+            prose-a:text-accent-600 prose-a:underline hover:prose-a:text-accent-700
+            prose-strong:text-brand-900
+            prose-ul:text-brand-700 prose-ol:text-brand-700
+            prose-img:rounded-lg prose-img:shadow-md
+            prose-blockquote:border-l-accent-600 prose-blockquote:text-brand-600"
+          dangerouslySetInnerHTML={{__html: page.body}}
+        />
+      </div>
     </div>
   );
 }

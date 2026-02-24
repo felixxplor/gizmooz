@@ -1,6 +1,6 @@
 import {CartForm, Money} from '@shopify/hydrogen';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
-import {ArrowRight, Tag} from 'lucide-react';
+import {ArrowRight, Tag, BadgePercent, Lock, RotateCcw, Truck} from 'lucide-react';
 
 type CartMainProps = {
   cart: CartApiQueryFragment;
@@ -8,61 +8,110 @@ type CartMainProps = {
 };
 
 export function CartSummary({cart, layout}: CartMainProps) {
+  const totalSaved = (cart.lines?.nodes || []).reduce((sum, line) => {
+    const discounts = (line as any).discountAllocations || [];
+    return (
+      sum +
+      discounts.reduce(
+        (dSum: number, a: any) =>
+          dSum + parseFloat(a.discountedAmount?.amount || '0'),
+        0,
+      )
+    );
+  }, 0);
+
   return (
-    <div
-      className={`space-y-4 ${layout === 'aside' ? 'sticky bottom-0 bg-white pt-4 border-t border-brand-200' : 'mt-8'}`}
-    >
+    <div className="space-y-4">
+      {/* Free Shipping Banner */}
+      <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-2">
+        <Truck className="w-4 h-4 text-green-600 shrink-0" />
+        <p className="text-sm font-semibold text-green-700">
+          Free shipping on your order!
+        </p>
+      </div>
+
       {/* Discount Code */}
       <CartDiscounts discountCodes={cart.discountCodes} />
 
-      {/* Summary */}
-      <div className="bg-brand-50 rounded-lg p-6 space-y-3">
-        <div className="flex justify-between text-sm">
-          <span className="text-brand-500">Subtotal</span>
-          <Money data={cart.cost.subtotalAmount} className="font-semibold" />
+      {/* Savings Banner */}
+      {totalSaved > 0 && (
+        <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+          <BadgePercent className="w-5 h-5 text-green-600 shrink-0" />
+          <p className="text-sm font-semibold text-green-700">
+            You're saving ${totalSaved.toFixed(2)} on this order!
+          </p>
+        </div>
+      )}
+
+      {/* Order Summary */}
+      <div className="border border-brand-200 rounded-xl p-4 space-y-3">
+        <h3 className="font-bold text-brand-900">Order Summary</h3>
+
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span className="text-brand-500">Subtotal</span>
+            {cart.cost?.subtotalAmount && (
+              <Money data={cart.cost.subtotalAmount} className="font-semibold" />
+            )}
+          </div>
+
+          {totalSaved > 0 && (
+            <div className="flex justify-between">
+              <span className="text-green-600">Discounts</span>
+              <span className="font-semibold text-green-600">
+                -${totalSaved.toFixed(2)}
+              </span>
+            </div>
+          )}
+
+          <div className="flex justify-between">
+            <span className="text-brand-500">Shipping</span>
+            <span className="font-semibold text-green-600">FREE</span>
+          </div>
+
+          {cart.cost?.totalTaxAmount && (
+            <div className="flex justify-between">
+              <span className="text-brand-500">Taxes</span>
+              <Money data={cart.cost.totalTaxAmount} className="font-semibold" />
+            </div>
+          )}
         </div>
 
-        {cart.cost.totalTaxAmount && (
-          <div className="flex justify-between text-sm">
-            <span className="text-brand-500">Taxes</span>
-            <Money data={cart.cost.totalTaxAmount} className="font-semibold" />
-          </div>
-        )}
-
-        <div className="border-t border-brand-300 pt-3 flex justify-between items-center">
+        <div className="border-t border-brand-200 pt-3 flex justify-between items-center">
           <span className="text-lg font-bold text-brand-900">Total</span>
-          <Money
-            data={cart.cost.totalAmount}
-            className="text-2xl font-bold text-brand-900"
-          />
+          {cart.cost?.totalAmount && (
+            <Money
+              data={cart.cost.totalAmount}
+              className="text-xl font-bold text-brand-900"
+            />
+          )}
         </div>
       </div>
 
       {/* Checkout Button */}
       <a
         href={cart.checkoutUrl}
-        className="w-full btn-primary py-4 text-lg"
+        className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white font-bold text-lg py-4 rounded-full transition-colors shadow-lg shadow-green-200"
       >
-        Proceed to Checkout
+        <Lock className="w-4 h-4" />
+        Secure Checkout
         <ArrowRight className="w-5 h-5" />
       </a>
 
-      {/* Mobile Sticky Checkout */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-brand-200 p-4 flex items-center justify-between sm:hidden z-40">
-        <div>
-          <span className="text-sm text-brand-500">Total</span>
-          <Money
-            data={cart.cost.totalAmount}
-            className="text-lg font-bold text-brand-900"
-          />
-        </div>
-        <a
-          href={cart.checkoutUrl}
-          className="btn-primary py-3 px-6"
-        >
-          Checkout
-          <ArrowRight className="w-4 h-4" />
-        </a>
+      {/* Trust Badges */}
+      <div className="grid grid-cols-3 gap-2 pt-1">
+        {[
+          {icon: Lock, label: 'SSL Secure'},
+          {icon: RotateCcw, label: '30-Day Returns'},
+          {icon: Truck, label: 'Fast Delivery'},
+        ].map(({icon: Icon, label}) => (
+          <div key={label} className="flex flex-col items-center gap-1 text-center">
+            <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center">
+              <Icon className="w-4 h-4 text-brand-600" />
+            </div>
+            <span className="text-xs text-brand-500">{label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -80,13 +129,10 @@ function CartDiscounts({
 
   return (
     <div className="space-y-2">
-      {/* Discount Code Form - visible by default */}
       <CartForm
         route="/cart"
         action={CartForm.ACTIONS.DiscountCodesUpdate}
-        inputs={{
-          discountCodes: codes,
-        }}
+        inputs={{discountCodes: codes}}
       >
         <div className="flex gap-2">
           <input
@@ -94,18 +140,17 @@ function CartDiscounts({
             name="discountCode"
             placeholder="Discount code"
             aria-label="Discount code"
-            className="flex-1 px-4 py-3 border-2 border-brand-300 rounded-lg focus:border-brand-900 focus:outline-none text-sm"
+            className="flex-1 min-w-0 px-3 py-2.5 border-2 border-brand-200 rounded-lg focus:border-brand-900 focus:outline-none text-sm"
           />
           <button
             type="submit"
-            className="btn-primary py-3 px-6 text-sm"
+            className="btn-secondary py-2.5 px-3 text-sm rounded-lg whitespace-nowrap shrink-0"
           >
             Apply
           </button>
         </div>
       </CartForm>
 
-      {/* Applied Discounts */}
       {codes.map((code) => (
         <div
           key={code}
@@ -118,9 +163,7 @@ function CartDiscounts({
           <CartForm
             route="/cart"
             action={CartForm.ACTIONS.DiscountCodesUpdate}
-            inputs={{
-              discountCodes: codes.filter((c) => c !== code),
-            }}
+            inputs={{discountCodes: codes.filter((c) => c !== code)}}
           >
             <button
               type="submit"

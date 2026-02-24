@@ -13,7 +13,7 @@ import type {Route} from '../+types/root';
 import {useState} from 'react';
 
 export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: `Gizmooz | ${data?.collection.title ?? ''} Collection`}];
+  return [{title: `Gizmody | ${data?.collection.title ?? ''} Collection`}];
 };
 
 function getSortValuesFromParam(sort: string | null) {
@@ -34,11 +34,6 @@ function getSortValuesFromParam(sort: string | null) {
 
 function buildProductFilters(searchParams: URLSearchParams) {
   const filters: any[] = [];
-
-  const available = searchParams.get('available');
-  if (available === 'true') {
-    filters.push({available: true});
-  }
 
   const priceMin = searchParams.get('price_min');
   const priceMax = searchParams.get('price_max');
@@ -73,7 +68,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   const {sortKey, reverse} = getSortValuesFromParam(url.searchParams.get('sort'));
   const filters = buildProductFilters(url.searchParams);
 
-  const [{collection}] = await Promise.all([
+  const [{collection}, {collections}] = await Promise.all([
     storefront.query(COLLECTION_QUERY, {
       variables: {
         handle,
@@ -83,6 +78,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
         ...paginationVariables,
       },
     }),
+    storefront.query(FILTER_COLLECTIONS_QUERY),
   ]);
 
   if (!collection) {
@@ -95,6 +91,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 
   return {
     collection,
+    collections: collections.nodes,
   };
 }
 
@@ -103,7 +100,7 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 }
 
 export default function Collection() {
-  const {collection} = useLoaderData<typeof loader>();
+  const {collection, collections} = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -113,7 +110,6 @@ export default function Collection() {
   const sortBy = searchParams.get('sort') || 'featured';
 
   const activeFilterCount = [
-    searchParams.get('available'),
     searchParams.get('price_min'),
     searchParams.get('price_max'),
   ].filter(Boolean).length;
@@ -125,11 +121,11 @@ export default function Collection() {
     } else {
       params.set('sort', value);
     }
-    navigate(`?${params.toString()}`, {replace: true});
+    navigate(`?${params.toString()}`, {replace: true, preventScrollReset: true});
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white">
       <CollectionHeader collection={collection} />
 
       <div className="section-container py-8">
@@ -139,8 +135,11 @@ export default function Collection() {
           productCount={collection.products.nodes.length}
           showFilters={showDesktopFilters}
           onToggleFilters={() => {
-            setShowDesktopFilters(!showDesktopFilters);
-            setShowMobileFilters(!showMobileFilters);
+            if (window.innerWidth >= 1024) {
+              setShowDesktopFilters(!showDesktopFilters);
+            } else {
+              setShowMobileFilters(!showMobileFilters);
+            }
           }}
           sortBy={sortBy}
           onSortChange={handleSortChange}
@@ -149,22 +148,27 @@ export default function Collection() {
           activeFilterCount={activeFilterCount}
         />
 
-        <div className="flex gap-8">
+        <div className="flex gap-0">
           {/* Desktop Sidebar Filters */}
-          {showDesktopFilters && (
-            <aside className="hidden lg:block w-64 flex-shrink-0">
-              <FilterSidebar />
-            </aside>
-          )}
+          <aside
+            className={`hidden lg:block flex-shrink-0 overflow-hidden transition-all duration-300 ease-in-out ${
+              showDesktopFilters ? 'w-64 mr-8 opacity-100' : 'w-0 mr-0 opacity-0'
+            }`}
+          >
+            <div className="w-64">
+              <FilterSidebar collections={collections} />
+            </div>
+          </aside>
 
           {/* Mobile Filter Drawer */}
           <MobileFilterDrawer
             isOpen={showMobileFilters}
             onClose={() => setShowMobileFilters(false)}
+            collections={collections}
           />
 
           {/* Products Grid */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <PaginatedResourceSection<ProductItemFragment>
               connection={collection.products}
               resourcesClassName={`grid grid-cols-2 ${
@@ -220,6 +224,35 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
         ...MoneyProductItem
       }
     }
+    compareAtPriceRange {
+      minVariantPrice {
+        ...MoneyProductItem
+      }
+    }
+    variants(first: 1) {
+      nodes {
+        id
+        availableForSale
+        price {
+          ...MoneyProductItem
+        }
+        compareAtPrice {
+          ...MoneyProductItem
+        }
+      }
+    }
+    metafield(namespace: "custom", key: "reviews") {
+      references(first: 50) {
+        nodes {
+          ... on Metaobject {
+            fields {
+              key
+              value
+            }
+          }
+        }
+      }
+    }
   }
 ` as const;
 
@@ -260,6 +293,20 @@ const COLLECTION_QUERY = `#graphql
           endCursor
           startCursor
         }
+      }
+    }
+  }
+` as const;
+
+const FILTER_COLLECTIONS_QUERY = `#graphql
+  query FilterCollections(
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    collections(first: 20, sortKey: TITLE) {
+      nodes {
+        handle
+        title
       }
     }
   }

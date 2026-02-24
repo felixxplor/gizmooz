@@ -7,7 +7,7 @@ import {
 } from '@shopify/hydrogen';
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
-import logo from '~/assets/logo.png';
+import logo from '~/assets/logo.svg';
 
 import {
   Search,
@@ -49,31 +49,75 @@ export function Header({
       {/* Main Header */}
       <header className="bg-white border-b border-brand-200 sticky top-0 z-50">
         {isSearchOpen ? (
-          /* Search Bar — replaces header content, padded to match nav row on desktop */
-          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 lg:pb-[44px]">
-            <Form
-              method="get"
-              action="/search"
-              className="flex items-center h-20 gap-4"
-            >
-              <Search className="w-5 h-5 text-brand-500 shrink-0" />
-              <input
-                name="q"
-                type="search"
-                placeholder="Search our store"
-                autoFocus
-                className="flex-1 text-base text-brand-900 placeholder:text-brand-400 outline-none bg-transparent"
-              />
-              <button
-                type="button"
-                onClick={() => setIsSearchOpen(false)}
-                className="shrink-0 p-2 hover:bg-brand-100 rounded-full transition-colors"
-                aria-label="Close search"
-              >
-                <X className="w-5 h-5 text-brand-700" />
-              </button>
-            </Form>
-          </div>
+          /* Search Bar — matches normal header height */
+          <>
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center h-20">
+                <div className="w-20 shrink-0" />
+                <Form
+                  method="get"
+                  action="/search"
+                  className="flex-1 max-w-2xl mx-auto flex items-center gap-3 border-b border-brand-300 pb-2"
+                >
+                  <Search className="w-5 h-5 text-brand-400 shrink-0" />
+                  <input
+                    name="q"
+                    type="search"
+                    placeholder="What are you looking for?"
+                    autoFocus
+                    className="flex-1 text-base text-brand-900 placeholder:text-brand-400 outline-none bg-transparent border-0! ring-0! shadow-none! rounded-none! m-0! p-0!"
+                  />
+                </Form>
+                <div className="w-20 shrink-0 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setIsSearchOpen(false)}
+                    className="text-sm text-brand-700 hover:text-brand-900 underline underline-offset-2 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+            {/* Quick links — matches desktop nav height */}
+            <div className="hidden lg:block border-t border-brand-100">
+              <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex items-center justify-center gap-6 py-3">
+                  {(menu || FALLBACK_HEADER_MENU).items
+                    .slice(0, 5)
+                    .map((item) => {
+                      if (!item.url) return null;
+                      let url = item.url;
+                      try {
+                        if (
+                          item.url.includes('myshopify.com') ||
+                          item.url.includes(publicStoreDomain) ||
+                          (header?.shop?.primaryDomain?.url &&
+                            item.url.includes(header.shop.primaryDomain.url))
+                        ) {
+                          url = new URL(item.url).pathname;
+                        }
+                      } catch (e) {
+                        url = item.url.startsWith('/')
+                          ? item.url
+                          : `/${item.url}`;
+                      }
+                      return (
+                        <NavLink
+                          key={item.id}
+                          prefetch="intent"
+                          to={url}
+                          onClick={() => setIsSearchOpen(false)}
+                          className="text-sm text-brand-600 hover:text-brand-900 transition-colors"
+                        >
+                          {item.title}
+                        </NavLink>
+                      );
+                    })}
+                </div>
+              </div>
+            </div>
+          </>
         ) : (
           /* Normal Header */
           <>
@@ -111,8 +155,10 @@ export function Header({
                 >
                   <img
                     src={logo}
-                    alt="Gizmooz"
-                    className="h-14 w-auto object-contain"
+                    alt="Gizmody"
+                    width={168}
+                    height={56}
+                    className="h-14 w-auto"
                   />
                 </NavLink>
 
@@ -145,7 +191,9 @@ export function Header({
                         url = new URL(item.url).pathname;
                       }
                     } catch (e) {
-                      url = item.url.startsWith('/') ? item.url : `/${item.url}`;
+                      url = item.url.startsWith('/')
+                        ? item.url
+                        : `/${item.url}`;
                     }
 
                     return (
@@ -173,9 +221,9 @@ export function Header({
           </>
         )}
 
-        {/* Mobile Menu Dropdown */}
+        {/* Mobile Menu Dropdown — absolute so it overlays content below */}
         {isMenuOpen && (
-          <div className="lg:hidden border-t border-brand-200 bg-white">
+          <div className="lg:hidden absolute top-full left-0 right-0 border-t border-brand-200 bg-white shadow-lg">
             <div className="max-w-[1400px] mx-auto px-4 py-6 space-y-1">
               {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
                 if (!item.url) return null;
@@ -367,6 +415,15 @@ const FALLBACK_HEADER_MENU = {
   id: 'gid://shopify/Menu/199655587896',
   items: [
     {
+      id: 'gid://shopify/MenuItem/461609500700',
+      resourceId: null,
+      tags: [],
+      title: 'Collections',
+      type: 'HTTP',
+      url: '/collections',
+      items: [],
+    },
+    {
       id: 'gid://shopify/MenuItem/461609500728',
       resourceId: null,
       tags: [],
@@ -394,6 +451,15 @@ const FALLBACK_HEADER_MENU = {
       items: [],
     },
     {
+      id: 'gid://shopify/MenuItem/461609599033',
+      resourceId: null,
+      tags: [],
+      title: 'New Arrivals',
+      type: 'HTTP',
+      url: '/collections/new-arrivals',
+      items: [],
+    },
+    {
       id: 'gid://shopify/MenuItem/461609599032',
       resourceId: null,
       tags: [],
@@ -403,12 +469,21 @@ const FALLBACK_HEADER_MENU = {
       items: [],
     },
     {
-      id: 'gid://shopify/MenuItem/461609599033',
+      id: 'gid://shopify/MenuItem/461609599034',
       resourceId: null,
       tags: [],
-      title: 'New Arrivals',
+      title: 'About',
       type: 'HTTP',
-      url: '/collections/new-arrivals',
+      url: '/pages/about',
+      items: [],
+    },
+    {
+      id: 'gid://shopify/MenuItem/461609599035',
+      resourceId: null,
+      tags: [],
+      title: 'Contact',
+      type: 'HTTP',
+      url: '/pages/contact',
       items: [],
     },
   ],

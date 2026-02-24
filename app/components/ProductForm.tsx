@@ -7,19 +7,23 @@ import type {
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
 import type {ProductFragment} from 'storefrontapi.generated';
-import {useState} from 'react';
+import {useMemo} from 'react';
 import {Minus, Plus} from 'lucide-react';
+import {Money} from '@shopify/hydrogen';
 
 export function ProductForm({
   productOptions,
   selectedVariant,
+  quantity,
+  setQuantity,
 }: {
   productOptions: MappedProductOptions[];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
+  quantity: number;
+  setQuantity: (qty: number | ((prev: number) => number)) => void;
 }) {
   const navigate = useNavigate();
   const {open} = useAside();
-  const [quantity, setQuantity] = useState(1);
 
   return (
     <div className="space-y-6">
@@ -126,6 +130,16 @@ export function ProductForm({
         </div>
       </div>
 
+      {/* Buy More, Save More */}
+      {selectedVariant?.price && (
+        <BuyMoreSaveMore
+          price={parseFloat(selectedVariant.price.amount)}
+          currencyCode={selectedVariant.price.currencyCode}
+          quantity={quantity}
+          onSelectTier={(qty) => setQuantity(qty)}
+        />
+      )}
+
       <AddToCartButton
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {
@@ -145,6 +159,99 @@ export function ProductForm({
       >
         {selectedVariant?.availableForSale ? 'Add to Cart' : 'Sold Out'}
       </AddToCartButton>
+    </div>
+  );
+}
+
+const TIERS = [
+  {qty: 1, discount: 0, label: null},
+  {qty: 2, discount: 0.1, label: 'MOST POPULAR'},
+  {qty: 3, discount: 0.15, label: null},
+];
+
+function BuyMoreSaveMore({
+  price,
+  currencyCode,
+  quantity,
+  onSelectTier,
+}: {
+  price: number;
+  currencyCode: string;
+  quantity: number;
+  onSelectTier: (qty: number) => void;
+}) {
+  return (
+    <div>
+      <h5 className="text-sm font-bold text-brand-900 mb-3">
+        Buy More, Save More!
+      </h5>
+      <div className="space-y-3">
+        {TIERS.map((tier) => {
+          const isSelected = quantity === tier.qty;
+          const perItem = price * (1 - tier.discount);
+          const totalPrice = perItem * tier.qty;
+          const totalSaved = price * tier.qty - totalPrice;
+
+          return (
+            <button
+              key={tier.qty}
+              type="button"
+              onClick={() => onSelectTier(tier.qty)}
+              className={`w-full text-left rounded-lg border-2 p-4 transition-colors cursor-pointer ${
+                isSelected
+                  ? 'border-brand-900 bg-brand-50'
+                  : 'border-brand-200 hover:border-brand-400'
+              }`}
+            >
+              {tier.label && (
+                <span className="text-xs font-bold uppercase tracking-wider text-accent-600 mb-1 block">
+                  {tier.label}
+                </span>
+              )}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      isSelected ? 'border-brand-900' : 'border-brand-400'
+                    }`}
+                  >
+                    {isSelected && (
+                      <div className="w-3 h-3 rounded-full bg-brand-900" />
+                    )}
+                  </div>
+                  <span className="text-sm font-semibold text-brand-900">
+                    BUY {tier.qty} {tier.discount > 0 ? `WITH ${tier.discount * 100}% OFF` : `FOR $${price.toFixed(2)}`}
+                  </span>
+                </div>
+
+                {tier.discount > 0 && (
+                  <div className="text-right">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-brand-400 line-through">
+                        ${price.toFixed(2)}
+                      </span>
+                      <span className="text-sm font-bold text-brand-900">
+                        ${perItem.toFixed(2)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-brand-500">
+                      Total: ${totalPrice.toFixed(2)}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {tier.discount > 0 && totalSaved > 0 && (
+                <div className="mt-2">
+                  <span className="inline-block text-xs font-bold text-white bg-accent-600 px-3 py-1 rounded-full">
+                    save: ${totalSaved.toFixed(2)}
+                  </span>
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

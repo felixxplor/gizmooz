@@ -22,17 +22,21 @@ export function PaginatedResourceSection<NodesType>({
 
         return (
           <div>
-            <PreviousLink>
-              {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
-            </PreviousLink>
+            <div className="flex justify-center mb-8">
+              <PreviousLink className="btn-secondary px-6 py-3 text-sm font-medium">
+                {isLoading ? 'Loading...' : <span>&#8593; Load previous</span>}
+              </PreviousLink>
+            </div>
             {resourcesClassName ? (
               <div className={resourcesClassName}>{resourcesMarkup}</div>
             ) : (
               resourcesMarkup
             )}
-            <NextLink>
-              {isLoading ? 'Loading...' : <span>Load more ↓</span>}
-            </NextLink>
+            <div className="flex justify-center mt-8">
+              <NextLink className="btn-primary px-8 py-3 text-sm font-medium">
+                {isLoading ? 'Loading...' : <span>Load more &#8595;</span>}
+              </NextLink>
+            </div>
           </div>
         );
       }}

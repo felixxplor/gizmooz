@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: `Order ${data?.order?.name} | Gizmooz`}];
+  return [{title: `Order ${data?.order?.name} | Gizmody`}];
 };
 
 export async function loader({params, context}: Route.LoaderArgs) {

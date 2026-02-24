@@ -24,6 +24,13 @@ export default async function handleRequest(
       'https://shopify.com',
       'https://d3e33eb8b59a.ngrok-free.app/',
     ],
+    imgSrc: [
+      "'self'",
+      'https://cdn.shopify.com',
+      'https://images.unsplash.com',
+      'https://i.pravatar.cc',
+      'data:',
+    ],
   });
 
   const body = await renderToReadableStream(

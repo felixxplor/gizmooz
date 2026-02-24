@@ -30,7 +30,7 @@ import {
 
 export const meta: Route.MetaFunction = ({data}) => {
   const term = (data as any)?.term || '';
-  return [{title: `${term ? `Search: ${term} | ` : ''}Gizmooz`}];
+  return [{title: `${term ? `Search: ${term} | ` : ''}Gizmody`}];
 };
 
 export async function loader({request, context}: Route.LoaderArgs) {
