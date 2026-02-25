@@ -32,15 +32,18 @@ export function MobileFilterDrawer({isOpen, onClose, collections}: MobileFilterD
   return (
     <div
       className="lg:hidden fixed inset-0 bg-black/50 z-50"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Filters"
-      onClick={onClose}
+      role="button"
+      tabIndex={-1}
+      aria-label="Close filters"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+      onKeyDown={(e) => e.key === 'Escape' && onClose()}
     >
       <div
         ref={drawerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Filters"
         className="absolute left-0 top-0 bottom-0 w-80 bg-white p-6 overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold text-brand-900">Filters</h3>

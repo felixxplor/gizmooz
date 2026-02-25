@@ -1,6 +1,6 @@
 import {redirect, useLoaderData} from 'react-router';
 import {useState} from 'react';
-import type {Route} from './+types/products.$handle';
+import type {Route} from './+types/($locale).products.$handle';
 import {
   getSelectedProductOptions,
   Analytics,
@@ -21,18 +21,58 @@ import {Link} from 'react-router';
 import {ProductForm} from '~/components/ProductForm';
 import {Store, RotateCcw, Plus, Minus} from 'lucide-react';
 import {CartForm, Money, Image} from '@shopify/hydrogen';
+import type {CurrencyCode} from '@shopify/hydrogen/storefront-api-types';
 import {useAside} from '~/components/Aside';
-import {type FetcherWithComponents} from 'react-router';
 import afterpayLogo from '~/assets/Afterpay.svg';
 import paypalLogo from '~/assets/PayPal.svg';
 import zipLogo from '~/assets/Zip.svg';
 
 export const meta: Route.MetaFunction = ({data}) => {
+  const product = data?.product;
+  const seoTitle = product?.seo?.title || product?.title || '';
+  const seoDesc = product?.seo?.description || product?.description || '';
+  const image = product?.images?.nodes?.[0]?.url;
+  const url = `/products/${product?.handle ?? ''}`;
+  const variant = product?.selectedOrFirstAvailableVariant;
+
   return [
-    {title: `Gizmody | ${data?.product.title ?? ''}`},
+    {title: `Gizmody | ${seoTitle}`},
+    {name: 'description', content: seoDesc},
+    {rel: 'canonical', href: url},
+    {property: 'og:type', content: 'product'},
+    {property: 'og:title', content: seoTitle},
+    {property: 'og:description', content: seoDesc},
+    {property: 'og:url', content: url},
+    ...(image ? [{property: 'og:image', content: image}] : []),
+    {name: 'twitter:card', content: 'summary_large_image'},
+    {name: 'twitter:title', content: seoTitle},
+    {name: 'twitter:description', content: seoDesc},
+    ...(image ? [{name: 'twitter:image', content: image}] : []),
     {
-      rel: 'canonical',
-      href: `/products/${data?.product.handle}`,
+      'script:ld+json': {
+        '@context': 'https://schema.org/',
+        '@type': 'Product',
+        name: seoTitle,
+        description: seoDesc,
+        ...(image ? {image: [image]} : {}),
+        offers: {
+          '@type': 'Offer',
+          priceCurrency: variant?.price?.currencyCode ?? 'AUD',
+          price: variant?.price?.amount ?? '0',
+          availability: variant?.availableForSale
+            ? 'https://schema.org/InStock'
+            : 'https://schema.org/OutOfStock',
+        },
+        ...(data?.reviews?.total
+          ? {
+              aggregateRating: {
+                '@type': 'AggregateRating',
+                ratingValue: data.reviews.average,
+                reviewCount: data.reviews.total,
+              },
+            }
+          : {}),
+      },
     },
   ];
 };
@@ -272,14 +312,23 @@ export default function Product() {
   );
 }
 
+type StickyProduct = {title: string};
+type StickyVariant = {
+  id: string;
+  title: string;
+  availableForSale: boolean;
+  price: {amount: string; currencyCode: CurrencyCode};
+  image?: {url: string; altText?: string | null; width?: number | null; height?: number | null} | null;
+} | null | undefined;
+
 function StickyAddToCart({
   product,
   selectedVariant,
   quantity,
   setQuantity,
 }: {
-  product: any;
-  selectedVariant: any;
+  product: StickyProduct;
+  selectedVariant: StickyVariant;
   quantity: number;
   setQuantity: (qty: number | ((prev: number) => number)) => void;
 }) {
@@ -354,7 +403,7 @@ function StickyAddToCart({
             lines: [{merchandiseId: selectedVariant.id, quantity}],
           }}
         >
-          {(fetcher: FetcherWithComponents<any>) => {
+          {(fetcher) => {
             const isAdding = fetcher.state !== 'idle';
             return (
               <button

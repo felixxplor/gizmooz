@@ -64,8 +64,7 @@ export function Header({
                     name="q"
                     type="search"
                     placeholder="What are you looking for?"
-                    autoFocus
-                    className="flex-1 text-base text-brand-900 placeholder:text-brand-400 outline-none bg-transparent border-0! ring-0! shadow-none! rounded-none! m-0! p-0!"
+                      className="flex-1 text-base text-brand-900 placeholder:text-brand-400 outline-none bg-transparent border-0! ring-0! shadow-none! rounded-none! m-0! p-0!"
                   />
                 </Form>
                 <div className="shrink-0 pl-3 sm:w-20 flex justify-end">

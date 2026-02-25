@@ -18,11 +18,11 @@ export function CartLineItem({
 }) {
   const {id, merchandise} = line;
   const {product, title, image, selectedOptions} = merchandise;
+  const {close} = useAside();
 
   if (!product?.handle || !line.cost?.totalAmount) return null;
 
   const lineItemUrl = `/products/${product.handle}`;
-  const {close} = useAside();
 
   return (
     <li className="flex gap-3 py-4 border-b border-brand-200 last:border-b-0">
@@ -138,10 +138,10 @@ export function CartLineItem({
 }
 
 function CartLineQuantity({line}: {line: CartLine}) {
+  const fetchers = useFetchers();
+
   if (!line || typeof line?.quantity === 'undefined') return null;
   const {id: lineId, quantity} = line;
-
-  const fetchers = useFetchers();
   const isUpdating = fetchers.some(
     (f) =>
       f.state !== 'idle' &&

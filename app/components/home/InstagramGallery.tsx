@@ -54,7 +54,7 @@ export function InstagramGallery() {
             >
               <img
                 src={image.src}
-                alt={`Photo by ${image.handle}`}
+                alt={`Posted by ${image.handle}`}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 loading="lazy"
               />

@@ -50,10 +50,10 @@ export function ReviewForm({onSuccess, productId}: {onSuccess?: () => void; prod
       {productId && <input type="hidden" name="productId" value={productId} />}
 
       {/* Star Rating */}
-      <div>
-        <label className="block text-sm font-semibold text-brand-900 mb-2">
+      <div role="group" aria-labelledby="rating-label">
+        <span id="rating-label" className="block text-sm font-semibold text-brand-900 mb-2">
           Rating <span className="text-error">*</span>
-        </label>
+        </span>
         <div className="flex items-center gap-1">
           {[1, 2, 3, 4, 5].map((n) => (
             <button
@@ -109,7 +109,7 @@ export function ReviewForm({onSuccess, productId}: {onSuccess?: () => void; prod
 
       {/* Photo upload */}
       <div>
-        <label className="block text-sm font-semibold text-brand-900 mb-2">
+        <label htmlFor="photo" className="block text-sm font-semibold text-brand-900 mb-2">
           Photo <span className="text-brand-400 font-normal">(optional)</span>
         </label>
         {preview ? (
@@ -136,6 +136,7 @@ export function ReviewForm({onSuccess, productId}: {onSuccess?: () => void; prod
         )}
         <input
           ref={fileRef}
+          id="photo"
           type="file"
           name="photo"
           accept="image/*"

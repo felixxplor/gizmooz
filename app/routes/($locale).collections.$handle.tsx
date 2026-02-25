@@ -9,11 +9,26 @@ import {CollectionToolbar} from '~/components/collection/CollectionToolbar';
 import {FilterSidebar} from '~/components/collection/FilterSidebar';
 import {MobileFilterDrawer} from '~/components/collection/MobileFilterDrawer';
 import {ProductCard} from '~/components/collection/ProductCard';
-import type {Route} from '../+types/root';
+import type {Route} from './+types/($locale).collections.$handle';
 import {useState} from 'react';
 
 export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: `Gizmody | ${data?.collection.title ?? ''} Collection`}];
+  const collection = data?.collection;
+  const title = collection?.title ?? '';
+  const description = collection?.description ?? '';
+  const url = `/collections/${collection?.handle ?? ''}`;
+
+  return [
+    {title: `Gizmody | ${title} Collection`},
+    ...(description ? [{name: 'description', content: description}] : []),
+    {rel: 'canonical', href: url},
+    {property: 'og:type', content: 'website'},
+    {property: 'og:title', content: `${title} Collection`},
+    ...(description
+      ? [{property: 'og:description', content: description}]
+      : []),
+    {property: 'og:url', content: url},
+  ];
 };
 
 function getSortValuesFromParam(sort: string | null) {
@@ -121,7 +136,7 @@ export default function Collection() {
     } else {
       params.set('sort', value);
     }
-    navigate(`?${params.toString()}`, {replace: true, preventScrollReset: true});
+    void navigate(`?${params.toString()}`, {replace: true, preventScrollReset: true});
   };
 
   return (

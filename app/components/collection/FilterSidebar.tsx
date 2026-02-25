@@ -36,7 +36,7 @@ export function FilterSidebar({collections}: FilterSidebarProps) {
     } else {
       params.set('price_max', String(localPriceMax));
     }
-    navigate(`?${params.toString()}`, {replace: true, preventScrollReset: true});
+    void navigate(`?${params.toString()}`, {replace: true, preventScrollReset: true});
   };
 
   const clearFilters = () => {
@@ -45,7 +45,7 @@ export function FilterSidebar({collections}: FilterSidebarProps) {
     params.delete('price_max');
     setLocalPriceMin(0);
     setLocalPriceMax(1000);
-    navigate(`?${params.toString()}`, {replace: true, preventScrollReset: true});
+    void navigate(`?${params.toString()}`, {replace: true, preventScrollReset: true});
   };
 
   const hasFilters =
@@ -67,8 +67,9 @@ export function FilterSidebar({collections}: FilterSidebarProps) {
         <h3 className="font-bold text-lg mb-4 text-brand-900">Price Range</h3>
         <div className="space-y-5">
           <div>
-            <label className="text-sm text-brand-500 mb-1 block">Min Price</label>
+            <label htmlFor="price-min" className="text-sm text-brand-500 mb-1 block">Min Price</label>
             <input
+              id="price-min"
               type="range"
               min="0"
               max="1000"
@@ -82,8 +83,9 @@ export function FilterSidebar({collections}: FilterSidebarProps) {
             />
           </div>
           <div>
-            <label className="text-sm text-brand-500 mb-1 block">Max Price</label>
+            <label htmlFor="price-max" className="text-sm text-brand-500 mb-1 block">Max Price</label>
             <input
+              id="price-max"
               type="range"
               min="0"
               max="1000"

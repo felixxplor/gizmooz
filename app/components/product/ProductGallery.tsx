@@ -4,11 +4,11 @@ import {ChevronLeft, ChevronRight} from 'lucide-react';
 
 interface ProductGalleryProps {
   images: Array<{
-    id: string;
+    id?: string | null;
     url: string;
-    altText?: string;
-    width: number;
-    height: number;
+    altText?: string | null;
+    width?: number | null;
+    height?: number | null;
   }>;
   productTitle: string;
 }
@@ -46,13 +46,13 @@ export function ProductGallery({images, productTitle}: ProductGalleryProps) {
   }
 
   return (
-    <div onKeyDown={handleKeyDown} className="flex flex-col lg:flex-row gap-3">
+    <div className="flex flex-col lg:flex-row gap-3">
       {/* Thumbnails — horizontal strip below on mobile, vertical strip left on desktop */}
       {images.length > 1 && (
         <div className="flex lg:flex-col gap-2 order-last lg:order-first lg:w-16 lg:shrink-0 overflow-x-auto lg:overflow-visible pb-1 lg:pb-0">
           {images.map((image, index) => (
             <button
-              key={image.id}
+              key={image.id ?? image.url}
               onClick={() => setCurrentIndex(index)}
               aria-label={`View image ${index + 1}`}
               className={`w-16 aspect-square shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
@@ -72,12 +72,16 @@ export function ProductGallery({images, productTitle}: ProductGalleryProps) {
       )}
 
       {/* Main Image */}
-      <div className="relative flex-1 aspect-square bg-brand-50 rounded-xl overflow-hidden">
+      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
+      <div
+        className="relative flex-1 aspect-square bg-brand-50 rounded-xl overflow-hidden"
+        onKeyDown={handleKeyDown}
+      >
         <Image
           data={images[currentIndex]}
           className="w-full h-full object-cover"
           sizes="(min-width: 1024px) 45vw, 100vw"
-          fetchpriority={currentIndex === 0 ? 'high' : undefined}
+          fetchPriority={currentIndex === 0 ? 'high' : undefined}
         />
 
         {images.length > 1 && (

@@ -6,7 +6,7 @@ export interface Review {
   reviewer: {name: string};
   created_at: string;
   verified_buyer: boolean;
-  photo?: {url: string; altText?: string; width?: number; height?: number};
+  photo?: {url: string; altText?: string | null; width?: number | null; height?: number | null};
 }
 
 export interface ReviewsData {
@@ -16,16 +16,37 @@ export interface ReviewsData {
   breakdown: {stars: number; pct: number}[];
 }
 
-export function parseMetaobjectReviews(product: any): ReviewsData | null {
+type ReviewField = {
+  key: string;
+  value: string;
+  reference?: {
+    image?: {
+      url: string;
+      altText?: string | null;
+      width?: number | null;
+      height?: number | null;
+    } | null;
+  } | null;
+};
+
+type ReviewableProduct = {
+  metafield?: {
+    references?: {
+      nodes?: unknown[];
+    } | null;
+  } | null;
+};
+
+type ReviewNode = {id: string; fields: ReviewField[]};
+
+export function parseMetaobjectReviews(
+  product: ReviewableProduct | null | undefined,
+): ReviewsData | null {
   const nodes = product?.metafield?.references?.nodes;
   if (!nodes?.length) return null;
 
-  const reviews: Review[] = nodes.map((node: any) => {
-    const fieldMap = Object.fromEntries(
-      (node.fields as {key: string; value: string; reference?: any}[]).map(
-        (f) => [f.key, f],
-      ),
-    );
+  const reviews: Review[] = (nodes as ReviewNode[]).map((node) => {
+    const fieldMap = Object.fromEntries(node.fields.map((f) => [f.key, f]));
     const photo = fieldMap.photo?.reference?.image ?? undefined;
     return {
       id: node.id,

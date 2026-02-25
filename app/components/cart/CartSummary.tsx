@@ -8,13 +8,15 @@ type CartMainProps = {
 };
 
 export function CartSummary({cart, layout}: CartMainProps) {
+  type LineWithDiscounts = {
+    discountAllocations?: Array<{discountedAmount?: {amount?: string | null} | null}>;
+  };
   const totalSaved = (cart.lines?.nodes || []).reduce((sum, line) => {
-    const discounts = (line as any).discountAllocations || [];
+    const discounts = (line as LineWithDiscounts).discountAllocations || [];
     return (
       sum +
       discounts.reduce(
-        (dSum: number, a: any) =>
-          dSum + parseFloat(a.discountedAmount?.amount || '0'),
+        (dSum, a) => dSum + parseFloat(a.discountedAmount?.amount || '0'),
         0,
       )
     );
@@ -38,7 +40,7 @@ export function CartSummary({cart, layout}: CartMainProps) {
         <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
           <BadgePercent className="w-5 h-5 text-green-600 shrink-0" />
           <p className="text-sm font-semibold text-green-700">
-            You're saving ${totalSaved.toFixed(2)} on this order!
+            You&apos;re saving ${totalSaved.toFixed(2)} on this order!
           </p>
         </div>
       )}

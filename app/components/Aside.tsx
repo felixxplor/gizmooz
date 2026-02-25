@@ -47,12 +47,16 @@ export function Aside({
     <>
       {/* Backdrop */}
       <div
+        role="button"
+        tabIndex={-1}
+        aria-label="Close"
         aria-hidden={!expanded}
         style={expanded ? undefined : {opacity: 0, pointerEvents: 'none'}}
         className={`fixed inset-0 bg-black/50 z-[60] transition-opacity duration-300 ${
           expanded ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={close}
+        onKeyDown={(e) => e.key === 'Enter' && close()}
       />
 
       {/* Drawer */}

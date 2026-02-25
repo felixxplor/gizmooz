@@ -55,6 +55,7 @@ async function adminGraphql(
   accessToken: string,
   query: string,
   variables: Record<string, unknown>,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
   const res = await fetch(
     `https://${shopDomain}/admin/api/2026-01/graphql.json`,
@@ -167,7 +168,7 @@ async function linkReviewToProduct(
     fetchResult?.data?.product?.metafield?.value ?? '[]';
   let existing: string[] = [];
   try {
-    existing = JSON.parse(rawValue);
+    existing = JSON.parse(rawValue) as string[];
   } catch {
     existing = [];
   }
@@ -265,6 +266,20 @@ export async function action({request, context}: ActionFunctionArgs) {
   // Upload photo if provided
   let photoGid: string | null = null;
   if (photo && photo.size > 0) {
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+    if (!ALLOWED_TYPES.includes(photo.type)) {
+      return Response.json(
+        {error: 'Photo must be a JPEG, PNG, WebP or GIF image.'},
+        {status: 400},
+      );
+    }
+    if (photo.size > MAX_SIZE) {
+      return Response.json(
+        {error: 'Photo must be smaller than 5MB.'},
+        {status: 400},
+      );
+    }
     photoGid = await uploadPhoto(env.PUBLIC_STORE_DOMAIN, accessToken, photo);
   }
 
@@ -313,8 +328,9 @@ export async function action({request, context}: ActionFunctionArgs) {
         productId,
         reviewGid,
       );
-    } catch (e: any) {
-      // linking failed silently — review was still saved
+    } catch (e) {
+      console.error('[reviews] Failed to link review to product:', e);
+      // linking failed — review was still saved
     }
   }
 

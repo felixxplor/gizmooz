@@ -244,8 +244,12 @@ export function ProductReviews({data, productId}: {data?: ReviewsData | null; pr
       {/* Review Form Modal */}
       {showForm && (
         <div
+          role="button"
+          tabIndex={-1}
+          aria-label="Close review form"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
           onClick={(e) => e.target === e.currentTarget && setShowForm(false)}
+          onKeyDown={(e) => e.key === 'Escape' && setShowForm(false)}
         >
           <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white flex items-center justify-between px-6 pt-6 pb-4 border-b border-brand-200 rounded-t-2xl">

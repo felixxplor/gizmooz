@@ -97,7 +97,7 @@ export default function AllProducts() {
     } else {
       params.set('sort', value);
     }
-    navigate(`?${params.toString()}`, {replace: true, preventScrollReset: true});
+    void navigate(`?${params.toString()}`, {replace: true, preventScrollReset: true});
   };
 
   return (

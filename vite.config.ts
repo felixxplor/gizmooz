@@ -34,9 +34,6 @@ export default defineConfig({
     },
   },
   server: {
-    allowedHosts: [
-      '.tryhydrogen.dev',
-      'lakia-nonalignable-unsolemnly.ngrok-free.dev',
-    ],
+    allowedHosts: ['.tryhydrogen.dev'],
   },
 });

@@ -22,7 +22,7 @@ export function CartEmpty({hidden, layout}: CartEmptyProps) {
         Your cart is empty
       </h3>
       <p className="text-brand-500 mb-8 max-w-sm">
-        Looks like you haven't added anything yet. Let's get you started!
+        Looks like you haven&apos;t added anything yet. Let&apos;s get you started!
       </p>
 
       <Link

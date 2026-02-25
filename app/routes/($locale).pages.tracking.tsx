@@ -366,7 +366,7 @@ export default function TrackingPage() {
             <div>
               <p className="font-semibold text-red-800 text-sm">{error}</p>
               <p className="text-red-600 text-xs mt-1">
-                Double-check your order number (found in your confirmation email) and make sure you're using the same email address.
+                Double-check your order number (found in your confirmation email) and make sure you&apos;re using the same email address.
               </p>
             </div>
           </div>
