@@ -53,7 +53,7 @@ export function Header({
           <>
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center h-20">
-                <div className="w-20 shrink-0" />
+                <div className="hidden sm:block w-20 shrink-0" />
                 <Form
                   method="get"
                   action="/search"
@@ -68,7 +68,7 @@ export function Header({
                     className="flex-1 text-base text-brand-900 placeholder:text-brand-400 outline-none bg-transparent border-0! ring-0! shadow-none! rounded-none! m-0! p-0!"
                   />
                 </Form>
-                <div className="w-20 shrink-0 flex justify-end">
+                <div className="shrink-0 pl-3 sm:w-20 flex justify-end">
                   <button
                     type="button"
                     onClick={() => setIsSearchOpen(false)}

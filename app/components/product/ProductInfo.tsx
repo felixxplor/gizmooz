@@ -19,7 +19,7 @@ export function ProductInfo({
   return (
     <div className="space-y-4">
       {/* Title */}
-      <h1 className="text-3xl sm:text-4xl font-bold text-brand-900">{title}</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-brand-900">{title}</h1>
 
       {/* Rating */}
       {reviewAverage !== undefined && reviewCount !== undefined && reviewCount > 0 && (

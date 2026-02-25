@@ -109,11 +109,11 @@ export default function Product() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="section-container py-8">
+      <div className="section-container py-4 lg:py-8">
         {/* Breadcrumbs */}
         <nav
           aria-label="Breadcrumb"
-          className="flex items-center gap-2 text-sm text-brand-500 mb-8"
+          className="hidden sm:flex items-center gap-2 text-sm text-brand-500 mb-8"
         >
           <ol className="flex items-center gap-2">
             <li>
@@ -141,8 +141,8 @@ export default function Product() {
 
         {/* Product Grid */}
         <div className="grid lg:grid-cols-2 gap-12 items-start">
-          {/* Left: Image Gallery — sticky so it stays in view while right column scrolls */}
-          <div className="sticky top-32">
+          {/* Left: Image Gallery — sticky on desktop only */}
+          <div className="lg:sticky lg:top-32">
             <ProductGallery images={images} productTitle={product.title} />
           </div>
 
@@ -289,9 +289,9 @@ function StickyAddToCart({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-brand-200 shadow-[0_-4px_12px_rgba(0,0,0,0.08)] z-40">
-      <div className="section-container py-3 flex items-center gap-4">
-        {/* Product Image & Info */}
-        <div className="flex items-center gap-3 flex-1 min-w-0">
+      <div className="section-container py-3 flex items-center gap-3">
+        {/* Product Image & Info — desktop only */}
+        <div className="hidden sm:flex items-center gap-3 flex-1 min-w-0">
           {selectedVariant.image && (
             <div className="w-12 h-12 rounded-lg overflow-hidden bg-brand-50 shrink-0">
               <Image
@@ -315,7 +315,7 @@ function StickyAddToCart({
         </div>
 
         {/* Price */}
-        <div className="shrink-0">
+        <div className="shrink-0 flex-1 sm:flex-none">
           <Money
             data={selectedVariant.price}
             className="text-lg font-bold text-brand-900"
@@ -505,7 +505,7 @@ const PRODUCT_QUERY = `#graphql
 ` as const;
 
 const RECOMMENDED_PRODUCTS_QUERY = `#graphql
-  fragment RecommendedProduct on Product {
+  fragment ProductRecommendedProduct on Product {
     id
     title
     handle
@@ -560,11 +560,11 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
       }
     }
   }
-  query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
+  query ProductRecommendedProducts ($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {
     products(first: 4, sortKey: BEST_SELLING) {
       nodes {
-        ...RecommendedProduct
+        ...ProductRecommendedProduct
       }
     }
   }

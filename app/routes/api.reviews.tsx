@@ -1,6 +1,6 @@
 import type {ActionFunctionArgs} from 'react-router';
 
-const STAGED_UPLOADS_MUTATION = `#graphql
+const STAGED_UPLOADS_MUTATION = `
   mutation stagedUploadsCreate($input: [StagedUploadInput!]!) {
     stagedUploadsCreate(input: $input) {
       stagedTargets {
@@ -13,7 +13,7 @@ const STAGED_UPLOADS_MUTATION = `#graphql
   }
 `;
 
-const FILE_CREATE_MUTATION = `#graphql
+const FILE_CREATE_MUTATION = `
   mutation fileCreate($files: [FileCreateInput!]!) {
     fileCreate(files: $files) {
       files { id }
@@ -22,7 +22,7 @@ const FILE_CREATE_MUTATION = `#graphql
   }
 `;
 
-const GET_PRODUCT_REVIEWS_METAFIELD = `#graphql
+const GET_PRODUCT_REVIEWS_METAFIELD = `
   query GetProductReviewsMetafield($id: ID!) {
     product(id: $id) {
       metafield(namespace: "custom", key: "reviews") {
@@ -32,7 +32,7 @@ const GET_PRODUCT_REVIEWS_METAFIELD = `#graphql
   }
 `;
 
-const METAFIELDS_SET_MUTATION = `#graphql
+const METAFIELDS_SET_MUTATION = `
   mutation metafieldsSet($metafields: [MetafieldsSetInput!]!) {
     metafieldsSet(metafields: $metafields) {
       metafields { id }
@@ -41,7 +41,7 @@ const METAFIELDS_SET_MUTATION = `#graphql
   }
 `;
 
-const CREATE_REVIEW_MUTATION = `#graphql
+const CREATE_REVIEW_MUTATION = `
   mutation MetaobjectCreate($metaobject: MetaobjectCreateInput!) {
     metaobjectCreate(metaobject: $metaobject) {
       metaobject { id }
@@ -93,19 +93,15 @@ async function uploadPhoto(
     },
   );
 
-  console.log('[photo staged] raw response:', JSON.stringify(stagedResult, null, 2));
-
   const stagedErrors =
     stagedResult?.data?.stagedUploadsCreate?.userErrors ?? [];
   if (stagedResult?.errors?.length || stagedErrors.length) {
-    console.error('[photo staged] errors:', JSON.stringify(stagedResult?.errors ?? stagedErrors));
     return null;
   }
 
   const target =
     stagedResult?.data?.stagedUploadsCreate?.stagedTargets?.[0];
   if (!target) {
-    console.error('[photo staged] no target returned');
     return null;
   }
 
@@ -125,7 +121,6 @@ async function uploadPhoto(
   });
 
   if (!uploadRes.ok) {
-    console.error('[photo upload] HTTP', uploadRes.status);
     return null;
   }
 
@@ -147,13 +142,11 @@ async function uploadPhoto(
 
   const fileErrors = fileResult?.data?.fileCreate?.userErrors ?? [];
   if (fileErrors.length) {
-    console.error('[photo fileCreate]', JSON.stringify(fileErrors));
     return null;
   }
 
   const fileGid: string | undefined =
     fileResult?.data?.fileCreate?.files?.[0]?.id;
-  console.log('[photo] created file GID:', fileGid);
   return fileGid ?? null;
 }
 
@@ -263,7 +256,6 @@ export async function action({request, context}: ActionFunctionArgs) {
       env.SHOPIFY_API_SECRET,
     );
   } catch (e) {
-    console.error('[review token]', e);
     return Response.json(
       {error: 'Failed to authenticate. Please try again.'},
       {status: 500},
@@ -304,10 +296,6 @@ export async function action({request, context}: ActionFunctionArgs) {
 
   const userErrors = json?.data?.metaobjectCreate?.userErrors ?? [];
   if (json?.errors?.length || userErrors.length) {
-    console.error(
-      '[review submit]',
-      JSON.stringify(json?.errors ?? userErrors, null, 2),
-    );
     return Response.json(
       {error: 'Failed to submit review. Please try again.'},
       {status: 500},
@@ -325,9 +313,8 @@ export async function action({request, context}: ActionFunctionArgs) {
         productId,
         reviewGid,
       );
-      console.log('[review link] ✓ linked', reviewGid, '→', productId);
     } catch (e: any) {
-      console.error('[review link] FAILED:', e?.message ?? e);
+      // linking failed silently — review was still saved
     }
   }
 

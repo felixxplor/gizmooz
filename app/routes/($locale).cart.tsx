@@ -152,7 +152,7 @@ export default function Cart() {
 }
 
 const RECOMMENDED_PRODUCTS_QUERY = `#graphql
-  fragment RecommendedProduct on Product {
+  fragment CartRecommendedProduct on Product {
     id
     title
     handle
@@ -186,11 +186,11 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
       }
     }
   }
-  query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
+  query CartRecommendedProducts ($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {
     products(first: 4, sortKey: BEST_SELLING) {
       nodes {
-        ...RecommendedProduct
+        ...CartRecommendedProduct
       }
     }
   }

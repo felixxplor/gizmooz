@@ -1,3 +1,4 @@
+import {useState, useRef, useEffect} from 'react';
 import {
   SlidersHorizontal,
   ChevronDown,
@@ -14,6 +15,71 @@ interface CollectionToolbarProps {
   gridCols: 3 | 4;
   onGridChange: (cols: 3 | 4) => void;
   activeFilterCount?: number;
+}
+
+const SORT_OPTIONS = [
+  {value: 'featured', label: 'Featured'},
+  {value: 'best-selling', label: 'Best Selling'},
+  {value: 'price-low-high', label: 'Price: Low to High'},
+  {value: 'price-high-low', label: 'Price: High to Low'},
+  {value: 'newest', label: 'Newest'},
+];
+
+function SortDropdown({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = SORT_OPTIONS.find((o) => o.value === value) ?? SORT_OPTIONS[0];
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-2 px-4 py-2 border-2 border-brand-300 rounded-lg font-medium text-sm focus:border-brand-900 focus:outline-none cursor-pointer whitespace-nowrap"
+      >
+        {selected.label}
+        <ChevronDown
+          className={`w-4 h-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full mt-1 bg-white border border-brand-200 rounded-lg shadow-lg z-20 min-w-full overflow-hidden">
+          {SORT_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => {
+                onChange(opt.value);
+                setOpen(false);
+              }}
+              className={`w-full text-left px-4 py-2.5 text-sm whitespace-nowrap hover:bg-brand-50 transition-colors ${
+                opt.value === value ? 'font-semibold text-brand-900' : 'text-brand-700'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function CollectionToolbar({
@@ -45,20 +111,7 @@ export function CollectionToolbar({
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="relative">
-          <select
-            value={sortBy}
-            onChange={(e) => onSortChange(e.target.value)}
-            className="appearance-none px-4 py-2 pr-10 border-2 border-brand-300 rounded-lg font-medium focus:border-brand-900 focus:outline-none cursor-pointer text-sm"
-          >
-            <option value="featured">Featured</option>
-            <option value="best-selling">Best Selling</option>
-            <option value="price-low-high">Price: Low to High</option>
-            <option value="price-high-low">Price: High to Low</option>
-            <option value="newest">Newest</option>
-          </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" />
-        </div>
+        <SortDropdown value={sortBy} onChange={onSortChange} />
 
         <div className="hidden sm:flex items-center gap-1 border-2 border-brand-300 rounded-lg p-1">
           <button

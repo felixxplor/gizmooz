@@ -39,26 +39,23 @@ export function ProductGallery({images, productTitle}: ProductGalleryProps) {
 
   if (!images || images.length === 0) {
     return (
-      <div className="aspect-square bg-brand-100 rounded-lg flex items-center justify-center">
+      <div className="aspect-square bg-brand-100 rounded-xl flex items-center justify-center">
         <p className="text-brand-400">No image available</p>
       </div>
     );
   }
 
   return (
-    <div
-      className="flex gap-3"
-      onKeyDown={handleKeyDown}
-    >
-      {/* Vertical Thumbnails */}
+    <div onKeyDown={handleKeyDown} className="flex flex-col lg:flex-row gap-3">
+      {/* Thumbnails — horizontal strip below on mobile, vertical strip left on desktop */}
       {images.length > 1 && (
-        <div className="flex flex-col gap-2 w-16 shrink-0">
+        <div className="flex lg:flex-col gap-2 order-last lg:order-first lg:w-16 lg:shrink-0 overflow-x-auto lg:overflow-visible pb-1 lg:pb-0">
           {images.map((image, index) => (
             <button
               key={image.id}
               onClick={() => setCurrentIndex(index)}
               aria-label={`View image ${index + 1}`}
-              className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+              className={`w-16 aspect-square shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
                 index === currentIndex
                   ? 'border-brand-900'
                   : 'border-transparent hover:border-brand-300'
@@ -75,7 +72,7 @@ export function ProductGallery({images, productTitle}: ProductGalleryProps) {
       )}
 
       {/* Main Image */}
-      <div className="relative flex-1 aspect-square bg-brand-50 rounded-lg overflow-hidden">
+      <div className="relative flex-1 aspect-square bg-brand-50 rounded-xl overflow-hidden">
         <Image
           data={images[currentIndex]}
           className="w-full h-full object-cover"
