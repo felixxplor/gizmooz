@@ -207,8 +207,8 @@ async function getAdminToken(
 ): Promise<string> {
   const res = await fetch(`https://${shopDomain}/admin/oauth/access_token`, {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
+    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: new URLSearchParams({
       client_id: clientId,
       client_secret: clientSecret,
       grant_type: 'client_credentials',
@@ -217,9 +217,7 @@ async function getAdminToken(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(
-      `Token request failed ${res.status}: ${text.slice(0, 200)}`,
-    );
+    throw new Error(`Token request failed ${res.status}: ${text.slice(0, 200)}`);
   }
 
   const data = (await res.json()) as {access_token: string};
@@ -249,6 +247,8 @@ export async function action({request, context}: ActionFunctionArgs) {
   const {env} = context;
   const today = new Date().toISOString().split('T')[0];
 
+  console.log('[reviews] shop:', env.PUBLIC_STORE_DOMAIN, 'key present:', !!env.SHOPIFY_API_KEY, 'secret present:', !!env.SHOPIFY_API_SECRET);
+
   let accessToken: string;
   try {
     accessToken = await getAdminToken(
@@ -256,7 +256,9 @@ export async function action({request, context}: ActionFunctionArgs) {
       env.SHOPIFY_API_KEY,
       env.SHOPIFY_API_SECRET,
     );
+    console.log('[reviews] token obtained ok');
   } catch (e) {
+    console.error('[reviews] Auth failed:', e);
     return Response.json(
       {error: 'Failed to authenticate. Please try again.'},
       {status: 500},
@@ -309,8 +311,11 @@ export async function action({request, context}: ActionFunctionArgs) {
     },
   );
 
+  console.log('[reviews] metaobjectCreate result:', JSON.stringify(json));
+
   const userErrors = json?.data?.metaobjectCreate?.userErrors ?? [];
   if (json?.errors?.length || userErrors.length) {
+    console.error('[reviews] metaobjectCreate errors:', JSON.stringify(json?.errors ?? userErrors));
     return Response.json(
       {error: 'Failed to submit review. Please try again.'},
       {status: 500},
