@@ -400,7 +400,7 @@ function StickyAddToCart({
           route="/cart"
           action={CartForm.ACTIONS.LinesAdd}
           inputs={{
-            lines: [{merchandiseId: selectedVariant.id, quantity}],
+            lines: [{merchandiseId: selectedVariant.id, quantity, selectedVariant}],
           }}
         >
           {(fetcher) => {

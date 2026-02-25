@@ -82,16 +82,6 @@ export function LogoCarousel() {
         </div>
       </div>
 
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-            @keyframes logo-scroll {
-              0% { transform: translateX(0); }
-              100% { transform: translateX(-50%); }
-            }
-          `,
-        }}
-      />
     </section>
   );
 }

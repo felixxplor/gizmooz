@@ -47,6 +47,7 @@ export function LatestBlogs({articles}: LatestBlogsProps) {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
+                      timeZone: 'UTC',
                     })}
                     {article.authorV2?.name && ` | By ${article.authorV2.name}`}
                   </div>

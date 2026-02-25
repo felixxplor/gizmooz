@@ -48,7 +48,7 @@ export function Aside({
       {/* Backdrop */}
       <div
         role="button"
-        tabIndex={-1}
+        tabIndex={expanded ? -1 : undefined}
         aria-label="Close"
         aria-hidden={!expanded}
         style={expanded ? undefined : {opacity: 0, pointerEvents: 'none'}}

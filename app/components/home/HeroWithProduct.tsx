@@ -12,7 +12,7 @@ export function HeroWithProduct() {
           src={HERO_IMAGE}
           alt="Gizmody — modern lifestyle products"
           className="w-full h-full object-cover"
-          fetchPriority="high"
+          fetchpriority="high"
         />
         <div className="absolute inset-0 bg-black/40" />
       </div>

@@ -256,7 +256,7 @@ export async function action({request, context}: ActionFunctionArgs) {
     );
   } catch (e) {
     return Response.json(
-      {error: 'AUTH_FAILED', detail: String(e)},
+      {error: 'Failed to authenticate. Please try again.'},
       {status: 500},
     );
   }
@@ -310,7 +310,7 @@ export async function action({request, context}: ActionFunctionArgs) {
   const userErrors = json?.data?.metaobjectCreate?.userErrors ?? [];
   if (json?.errors?.length || userErrors.length) {
     return Response.json(
-      {error: 'METAOBJECT_FAILED', detail: JSON.stringify(json?.errors ?? userErrors)},
+      {error: 'Failed to submit review. Please try again.'},
       {status: 500},
     );
   }

@@ -78,6 +78,11 @@
 * Announcement bar slide animations
 * --------------------------------------------------
 */
+@keyframes logo-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 @keyframes announcement-slide-left {
   from {
     opacity: 0;
