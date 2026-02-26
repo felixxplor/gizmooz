@@ -53,6 +53,9 @@ export async function createHydrogenRouterContext(
       cart: {
         queryFragment: CART_QUERY_FRAGMENT,
       },
+      customerAccount: {
+        authUrl: 'https://account.gizmody.com',
+      },
     },
     additionalContext,
   );
