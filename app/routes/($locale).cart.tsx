@@ -94,18 +94,30 @@ export async function action({request, context}: Route.ActionArgs) {
 export async function loader({context}: Route.LoaderArgs) {
   const {cart} = context;
 
+  // Await cart so we can extract product IDs to exclude from recommendations
+  const cartData = await cart.get();
+
+  const cartProductIds = new Set(
+    (cartData?.lines?.nodes ?? [])
+      .map((line: any) => line.merchandise?.product?.id)
+      .filter(Boolean),
+  );
+
   const recommendedProducts = context.storefront
     .query(RECOMMENDED_PRODUCTS_QUERY)
+    .then((data: any) => ({
+      products: {
+        nodes: (data?.products?.nodes ?? [])
+          .filter((p: any) => !cartProductIds.has(p.id))
+          .slice(0, 4),
+      },
+    }))
     .catch((error: Error) => {
       console.error(error);
       return null;
     });
 
-  // cart.get() is NOT awaited — returned as a deferred Promise, exactly like
-  // the root loader.  React Router resolves it via <Await> in the component,
-  // and when the loader revalidates after a cart mutation a brand-new Promise
-  // is created so <Await> re-resolves with the fresh server cart.
-  return {cart: cart.get(), recommendedProducts};
+  return {cart: Promise.resolve(cartData), recommendedProducts};
 }
 
 export default function Cart() {
@@ -188,7 +200,7 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
   }
   query CartRecommendedProducts ($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {
-    products(first: 4, sortKey: BEST_SELLING) {
+    products(first: 8, sortKey: BEST_SELLING) {
       nodes {
         ...CartRecommendedProduct
       }

@@ -25,9 +25,9 @@ export function CartSummary({cart, layout}: CartMainProps) {
   return (
     <div className="space-y-4">
       {/* Free Shipping Banner */}
-      <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-2">
-        <Truck className="w-4 h-4 text-green-600 shrink-0" />
-        <p className="text-sm font-semibold text-green-700">
+      <div className="bg-accent-50 border border-accent-200 rounded-xl p-4 flex items-center gap-2">
+        <Truck className="w-4 h-4 text-accent-600 shrink-0" />
+        <p className="text-sm font-semibold text-accent-700">
           Free shipping on your order!
         </p>
       </div>
@@ -37,9 +37,9 @@ export function CartSummary({cart, layout}: CartMainProps) {
 
       {/* Savings Banner */}
       {totalSaved > 0 && (
-        <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
-          <BadgePercent className="w-5 h-5 text-green-600 shrink-0" />
-          <p className="text-sm font-semibold text-green-700">
+        <div className="flex items-center gap-2 bg-accent-50 border border-accent-200 rounded-lg px-4 py-3">
+          <BadgePercent className="w-5 h-5 text-accent-600 shrink-0" />
+          <p className="text-sm font-semibold text-accent-700">
             You&apos;re saving ${totalSaved.toFixed(2)} on this order!
           </p>
         </div>
@@ -59,8 +59,8 @@ export function CartSummary({cart, layout}: CartMainProps) {
 
           {totalSaved > 0 && (
             <div className="flex justify-between">
-              <span className="text-green-600">Discounts</span>
-              <span className="font-semibold text-green-600">
+              <span className="text-accent-600">Discounts</span>
+              <span className="font-semibold text-accent-600">
                 -${totalSaved.toFixed(2)}
               </span>
             </div>
@@ -68,7 +68,7 @@ export function CartSummary({cart, layout}: CartMainProps) {
 
           <div className="flex justify-between">
             <span className="text-brand-500">Shipping</span>
-            <span className="font-semibold text-green-600">FREE</span>
+            <span className="font-semibold text-accent-600">FREE</span>
           </div>
 
           {cart.cost?.totalTaxAmount && (
@@ -93,12 +93,17 @@ export function CartSummary({cart, layout}: CartMainProps) {
       {/* Checkout Button */}
       <a
         href={cart.checkoutUrl}
-        className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white font-bold text-lg py-4 rounded-full transition-colors shadow-lg shadow-green-200"
+        className="flex items-center justify-center gap-2 w-full bg-accent-600 hover:bg-accent-700 text-white font-bold text-lg py-4 rounded-full transition-colors shadow-lg shadow-accent-200"
       >
-        <Lock className="w-4 h-4" />
-        Secure Checkout
-        <ArrowRight className="w-5 h-5" />
+        <Lock className="w-4 h-4 text-white" />
+        <span className="text-white">Secure Checkout</span>
+        <ArrowRight className="w-5 h-5 text-white" />
       </a>
+      <div className="text-center">
+        <a href="/cart" className="text-sm text-brand-500 hover:text-brand-700" style={{textDecoration: 'underline'}}>
+          Go to cart
+        </a>
+      </div>
 
       {/* Trust Badges */}
       <div className="grid grid-cols-3 gap-2 pt-1">
@@ -156,11 +161,11 @@ function CartDiscounts({
       {codes.map((code) => (
         <div
           key={code}
-          className="flex items-center justify-between px-4 py-3 bg-green-50 border border-green-200 rounded-lg"
+          className="flex items-center justify-between px-4 py-3 bg-accent-50 border border-accent-200 rounded-lg"
         >
           <div className="flex items-center gap-2">
-            <Tag className="w-4 h-4 text-green-600" />
-            <span className="font-semibold text-green-800">{code}</span>
+            <Tag className="w-4 h-4 text-accent-600" />
+            <span className="font-semibold text-accent-700">{code}</span>
           </div>
           <CartForm
             route="/cart"
@@ -169,7 +174,7 @@ function CartDiscounts({
           >
             <button
               type="submit"
-              className="text-sm text-green-600 hover:text-green-800 font-medium"
+              className="text-sm text-accent-600 hover:text-accent-700 font-medium"
             >
               Remove
             </button>

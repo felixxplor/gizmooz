@@ -78,8 +78,8 @@ export const meta: Route.MetaFunction = ({data}) => {
 };
 
 export async function loader(args: Route.LoaderArgs) {
-  const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
+  const deferredData = loadDeferredData(args, criticalData.product.id);
   return {...deferredData, ...criticalData};
 }
 
@@ -108,9 +108,10 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   return {product, reviews};
 }
 
-function loadDeferredData({context}: Route.LoaderArgs) {
+function loadDeferredData({context}: Route.LoaderArgs, productId: string) {
   const recommendedProducts = context.storefront
-    .query(RECOMMENDED_PRODUCTS_QUERY)
+    .query(RECOMMENDED_PRODUCTS_QUERY, {variables: {productId}})
+    .then((data: any) => ({products: {nodes: data?.productRecommendations ?? []}}))
     .catch((error: Error) => {
       console.error(error);
       return null;
@@ -609,12 +610,10 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
       }
     }
   }
-  query ProductRecommendedProducts ($country: CountryCode, $language: LanguageCode)
+  query ProductRecommendedProducts ($productId: ID!, $country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {
-    products(first: 4, sortKey: BEST_SELLING) {
-      nodes {
-        ...ProductRecommendedProduct
-      }
+    productRecommendations(productId: $productId) {
+      ...ProductRecommendedProduct
     }
   }
 ` as const;
