@@ -1332,13 +1332,14 @@ export type ProductRecommendedProductFragment = Pick<
 };
 
 export type ProductRecommendedProductsQueryVariables = StorefrontAPI.Exact<{
+  productId: StorefrontAPI.Scalars['ID']['input'];
   country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
   language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
 }>;
 
 export type ProductRecommendedProductsQuery = {
-  products: {
-    nodes: Array<
+  productRecommendations?: StorefrontAPI.Maybe<
+    Array<
       Pick<
         StorefrontAPI.Product,
         'id' | 'title' | 'handle' | 'availableForSale'
@@ -1385,8 +1386,8 @@ export type ProductRecommendedProductsQuery = {
           }>;
         }>;
       }
-    >;
-  };
+    >
+  >;
 };
 
 export type SearchProductFragment = {__typename: 'Product'} & Pick<
@@ -1651,7 +1652,7 @@ interface GeneratedQueryTypes {
     return: BlogsQuery;
     variables: BlogsQueryVariables;
   };
-  '#graphql\n  fragment CartRecommendedProduct on Product {\n    id\n    title\n    handle\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    compareAtPriceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n    variants(first: 1) {\n      nodes {\n        id\n        availableForSale\n        compareAtPrice {\n          amount\n          currencyCode\n        }\n      }\n    }\n  }\n  query CartRecommendedProducts ($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    products(first: 4, sortKey: BEST_SELLING) {\n      nodes {\n        ...CartRecommendedProduct\n      }\n    }\n  }\n': {
+  '#graphql\n  fragment CartRecommendedProduct on Product {\n    id\n    title\n    handle\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    compareAtPriceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n    variants(first: 1) {\n      nodes {\n        id\n        availableForSale\n        compareAtPrice {\n          amount\n          currencyCode\n        }\n      }\n    }\n  }\n  query CartRecommendedProducts ($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    products(first: 8, sortKey: BEST_SELLING) {\n      nodes {\n        ...CartRecommendedProduct\n      }\n    }\n  }\n': {
     return: CartRecommendedProductsQuery;
     variables: CartRecommendedProductsQueryVariables;
   };
@@ -1687,7 +1688,7 @@ interface GeneratedQueryTypes {
     return: ProductQuery;
     variables: ProductQueryVariables;
   };
-  '#graphql\n  fragment ProductRecommendedProduct on Product {\n    id\n    title\n    handle\n    availableForSale\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n      maxVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    compareAtPriceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n    variants(first: 1) {\n      nodes {\n        id\n        availableForSale\n        price {\n          amount\n          currencyCode\n        }\n        compareAtPrice {\n          amount\n          currencyCode\n        }\n      }\n    }\n    metafield(namespace: "custom", key: "reviews") {\n      references(first: 50) {\n        nodes {\n          ... on Metaobject {\n            fields {\n              key\n              value\n            }\n          }\n        }\n      }\n    }\n  }\n  query ProductRecommendedProducts ($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    products(first: 4, sortKey: BEST_SELLING) {\n      nodes {\n        ...ProductRecommendedProduct\n      }\n    }\n  }\n': {
+  '#graphql\n  fragment ProductRecommendedProduct on Product {\n    id\n    title\n    handle\n    availableForSale\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n      maxVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    compareAtPriceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n    variants(first: 1) {\n      nodes {\n        id\n        availableForSale\n        price {\n          amount\n          currencyCode\n        }\n        compareAtPrice {\n          amount\n          currencyCode\n        }\n      }\n    }\n    metafield(namespace: "custom", key: "reviews") {\n      references(first: 50) {\n        nodes {\n          ... on Metaobject {\n            fields {\n              key\n              value\n            }\n          }\n        }\n      }\n    }\n  }\n  query ProductRecommendedProducts ($productId: ID!, $country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    productRecommendations(productId: $productId) {\n      ...ProductRecommendedProduct\n    }\n  }\n': {
     return: ProductRecommendedProductsQuery;
     variables: ProductRecommendedProductsQueryVariables;
   };

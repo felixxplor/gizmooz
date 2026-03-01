@@ -168,7 +168,7 @@ function EmptyOrders({hasFilters = false}: {hasFilters?: boolean}) {
           </p>
           <Link
             to="/collections/all"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-brand-900 hover:bg-brand-800 text-white font-semibold rounded-lg transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-accent-600 hover:bg-accent-700 text-white font-semibold rounded-lg transition-all"
           >
             <ShoppingBag className="w-5 h-5" />
             Start Shopping

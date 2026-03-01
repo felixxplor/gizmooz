@@ -47,7 +47,7 @@ export default function AccountLayout() {
   return (
     <div className="min-h-screen bg-brand-50">
       {/* Header */}
-      <div className="bg-brand-900 py-12">
+      <div className="bg-accent-600 py-12">
         <div className="section-container">
           <h1 className="text-3xl sm:text-4xl font-bold text-white">
             {heading}
@@ -106,8 +106,8 @@ function AccountMenu() {
             className={({isActive}) =>
               `flex items-center justify-between p-4 rounded-lg transition-all ${
                 isActive
-                  ? 'bg-brand-900 text-white'
-                  : 'bg-white text-brand-600 hover:bg-brand-100 hover:text-brand-900'
+                  ? 'bg-accent-600 text-white'
+                  : 'bg-white text-brand-600 hover:bg-accent-50 hover:text-accent-700'
               }`
             }
           >
@@ -118,7 +118,7 @@ function AccountMenu() {
                   <div>
                     <p className="font-semibold">{item.label}</p>
                     <p
-                      className={`text-xs ${isActive ? 'text-brand-300' : 'text-brand-400'}`}
+                      className={`text-xs ${isActive ? 'text-accent-100' : 'text-brand-400'}`}
                     >
                       {item.description}
                     </p>
