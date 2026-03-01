@@ -117,226 +117,179 @@ export function Footer({
 
                   {/* Link Columns — 2-col grid on mobile, individual cells on lg */}
                   <div className="grid grid-cols-2 gap-6 lg:contents">
+                    {/* Shop Column */}
+                    <div>
+                      <h4 className="font-bold text-brand-900 mb-3 sm:mb-4 text-xs sm:text-sm uppercase tracking-wide">
+                        Shop
+                      </h4>
+                      <ul className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
+                        <li>
+                          <NavLink
+                            to="/collections/smart-home"
+                            prefetch="intent"
+                            className="text-brand-500 hover:text-brand-900 transition-colors"
+                          >
+                            Smart Home
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink
+                            to="/collections/wearables"
+                            prefetch="intent"
+                            className="text-brand-500 hover:text-brand-900 transition-colors"
+                          >
+                            Wearables
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink
+                            to="/collections/audio"
+                            prefetch="intent"
+                            className="text-brand-500 hover:text-brand-900 transition-colors"
+                          >
+                            Audio
+                          </NavLink>
+                        </li>
 
-                  {/* Shop Column */}
-                  <div>
-                    <h4 className="font-bold text-brand-900 mb-3 sm:mb-4 text-xs sm:text-sm uppercase tracking-wide">
-                      Shop
-                    </h4>
-                    <ul className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
-                      <li>
-                        <NavLink
-                          to="/collections/smart-home"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Smart Home
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
-                          to="/collections/wearables"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Wearables
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
-                          to="/collections/audio"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Audio
-                        </NavLink>
-                      </li>
+                        <li>
+                          <NavLink
+                            to="/collections/accessories"
+                            prefetch="intent"
+                            className="text-brand-500 hover:text-brand-900 transition-colors"
+                          >
+                            Accessories
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink
+                            to="/collections/sale"
+                            prefetch="intent"
+                            className="text-brand-500 hover:text-brand-900 transition-colors"
+                          >
+                            Sale
+                          </NavLink>
+                        </li>
+                      </ul>
+                    </div>
 
-                      <li>
-                        <NavLink
-                          to="/collections/accessories"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Accessories
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
-                          to="/collections/sale"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Sale
-                        </NavLink>
-                      </li>
-                    </ul>
+                    {/* Company Column */}
+                    <div>
+                      <h4 className="font-bold text-brand-900 mb-3 sm:mb-4 text-xs sm:text-sm uppercase tracking-wide">
+                        Company
+                      </h4>
+                      <ul className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
+                        <li>
+                          <NavLink
+                            to="/pages/about"
+                            prefetch="intent"
+                            className="text-brand-500 hover:text-brand-900 transition-colors"
+                          >
+                            About Us
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink
+                            to="/pages/terms"
+                            prefetch="intent"
+                            className="text-brand-500 hover:text-brand-900 transition-colors"
+                          >
+                            Terms &amp; Conditions
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink
+                            to="/pages/privacy"
+                            prefetch="intent"
+                            className="text-brand-500 hover:text-brand-900 transition-colors"
+                          >
+                            Privacy Policy
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink
+                            to="/pages/returns"
+                            prefetch="intent"
+                            className="text-brand-500 hover:text-brand-900 transition-colors"
+                          >
+                            Return Policy
+                          </NavLink>
+                        </li>
+                      </ul>
+                    </div>
+
+                    {/* Support Column */}
+                    <div>
+                      <h4 className="font-bold text-brand-900 mb-3 sm:mb-4 text-xs sm:text-sm uppercase tracking-wide">
+                        Support
+                      </h4>
+                      <ul className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
+                        <li>
+                          <NavLink
+                            to="/pages/faq"
+                            prefetch="intent"
+                            className="text-brand-500 hover:text-brand-900 transition-colors"
+                          >
+                            FAQ
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink
+                            to="/pages/help"
+                            prefetch="intent"
+                            className="text-brand-500 hover:text-brand-900 transition-colors"
+                          >
+                            Help Center
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink
+                            to="/pages/tracking"
+                            prefetch="intent"
+                            className="text-brand-500 hover:text-brand-900 transition-colors"
+                          >
+                            Track Orders
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink
+                            to="/pages/contact"
+                            prefetch="intent"
+                            className="text-brand-500 hover:text-brand-900 transition-colors"
+                          >
+                            Contact Us
+                          </NavLink>
+                        </li>
+                      </ul>
+                    </div>
+
+                    {/* Resources Column */}
+                    <div>
+                      <h4 className="font-bold text-brand-900 mb-3 sm:mb-4 text-xs sm:text-sm uppercase tracking-wide">
+                        Resources
+                      </h4>
+                      <ul className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
+                        <li>
+                          <NavLink
+                            to="https://instagram.com"
+                            prefetch="intent"
+                            className="text-brand-500 hover:text-brand-900 transition-colors"
+                          >
+                            Videos
+                          </NavLink>
+                        </li>
+                        <li>
+                          <NavLink
+                            to="/pages/sitemap"
+                            prefetch="intent"
+                            className="text-brand-500 hover:text-brand-900 transition-colors"
+                          >
+                            Sitemap
+                          </NavLink>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
-
-                  {/* Company Column */}
-                  <div>
-                    <h4 className="font-bold text-brand-900 mb-3 sm:mb-4 text-xs sm:text-sm uppercase tracking-wide">
-                      Company
-                    </h4>
-                    <ul className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
-                      <li>
-                        <NavLink
-                          to="/pages/about"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          About Us
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
-                          to="/blogs/news"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Press
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
-                          to="/pages/story"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Share Your Story
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
-                          to="/pages/terms"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Terms &amp; Conditions
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
-                          to="/pages/privacy"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Privacy Policy
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
-                          to="/pages/returns"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Return Policy
-                        </NavLink>
-                      </li>
-                    </ul>
-                  </div>
-
-                  {/* Support Column */}
-                  <div>
-                    <h4 className="font-bold text-brand-900 mb-3 sm:mb-4 text-xs sm:text-sm uppercase tracking-wide">
-                      Support
-                    </h4>
-                    <ul className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
-                      <li>
-                        <NavLink
-                          to="/pages/faq"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          FAQ
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
-                          to="/pages/help"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Help Center
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
-                          to="/pages/tracking"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Track Orders
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
-                          to="/pages/contact"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Contact Us
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
-                          to="/pages/returns"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Returns
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
-                          to="/pages/warranty"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Warranty
-                        </NavLink>
-                      </li>
-                    </ul>
-                  </div>
-
-                  {/* Resources Column */}
-                  <div>
-                    <h4 className="font-bold text-brand-900 mb-3 sm:mb-4 text-xs sm:text-sm uppercase tracking-wide">
-                      Resources
-                    </h4>
-                    <ul className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
-                      <li>
-                        <NavLink
-                          to="/pages/tech-guide"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Tech Guide
-                        </NavLink>
-                      </li>
-
-                      <li>
-                        <NavLink
-                          to="/pages/videos"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Videos
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
-                          to="/sitemap"
-                          prefetch="intent"
-                          className="text-brand-500 hover:text-brand-900 transition-colors"
-                        >
-                          Sitemap
-                        </NavLink>
-                      </li>
-                    </ul>
-                  </div>
-
-                  </div>{/* end link columns wrapper */}
+                  {/* end link columns wrapper */}
 
                   {/* Secure Payments Column */}
                   <div className="col-span-1 lg:col-span-1">
@@ -659,7 +612,11 @@ function FooterMenu({
 }
 
 function NewsletterForm() {
-  const fetcher = useFetcher<{success?: boolean; message?: string; error?: string}>();
+  const fetcher = useFetcher<{
+    success?: boolean;
+    message?: string;
+    error?: string;
+  }>();
   const inputRef = useRef<HTMLInputElement>(null);
   const isSubmitting = fetcher.state !== 'idle';
   const result = fetcher.data;
@@ -695,7 +652,9 @@ function NewsletterForm() {
         </button>
       </fetcher.Form>
       {result?.success && (
-        <p className="mt-2 text-xs text-success text-center">{result.message}</p>
+        <p className="mt-2 text-xs text-success text-center">
+          {result.message}
+        </p>
       )}
       {result?.error && (
         <p className="mt-2 text-xs text-error text-center">{result.error}</p>
