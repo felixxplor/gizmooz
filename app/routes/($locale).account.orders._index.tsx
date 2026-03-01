@@ -168,10 +168,10 @@ function EmptyOrders({hasFilters = false}: {hasFilters?: boolean}) {
           </p>
           <Link
             to="/collections/all"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-accent-600 hover:bg-accent-700 text-white font-semibold rounded-lg transition-all [&>svg]:text-white"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-accent-600 hover:bg-accent-700 text-white font-semibold rounded-lg transition-all"
           >
-            <ShoppingBag className="w-5 h-5" />
-            Start Shopping
+            <ShoppingBag className="w-5 h-5 text-white" />
+            <span className="text-white">Start Shopping</span>
           </Link>
         </>
       )}

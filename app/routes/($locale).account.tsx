@@ -46,9 +46,9 @@ export default function AccountLayout() {
   return (
     <div className="min-h-screen bg-brand-50">
       {/* Header */}
-      <div className="bg-accent-600 py-12">
+      <div className="bg-accent-100 py-12">
         <div className="section-container">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white">
+          <h1 className="text-3xl sm:text-4xl font-bold text-accent-700">
             {heading}
           </h1>
         </div>
@@ -105,7 +105,7 @@ function AccountMenu() {
             className={({isActive}) =>
               `flex items-center justify-between p-4 rounded-lg transition-all ${
                 isActive
-                  ? 'bg-accent-600 text-white'
+                  ? 'bg-accent-100 text-accent-700'
                   : 'bg-white text-brand-600 hover:bg-accent-50 hover:text-accent-700'
               }`
             }
@@ -113,17 +113,17 @@ function AccountMenu() {
             {({isActive}) => (
               <>
                 <div className="flex items-center gap-3">
-                  <Icon className={`w-5 h-5 ${isActive ? 'text-white' : ''}`} />
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-accent-700' : ''}`} />
                   <div>
-                    <p className={`font-semibold ${isActive ? 'text-white' : ''}`}>{item.label}</p>
+                    <p className={`font-semibold ${isActive ? 'text-accent-700' : ''}`}>{item.label}</p>
                     <p
-                      className={`text-xs ${isActive ? 'text-accent-100' : 'text-brand-400'}`}
+                      className={`text-xs ${isActive ? 'text-accent-500' : 'text-brand-400'}`}
                     >
                       {item.description}
                     </p>
                   </div>
                 </div>
-                <ChevronRight className={`w-5 h-5 ${isActive ? 'text-white' : ''}`} />
+                <ChevronRight className={`w-5 h-5 ${isActive ? 'text-accent-600' : ''}`} />
               </>
             )}
           </NavLink>

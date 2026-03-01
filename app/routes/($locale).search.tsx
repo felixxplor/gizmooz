@@ -67,17 +67,17 @@ export default function SearchPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Search Header */}
-      <div className="bg-brand-900 py-12">
+      <div className="bg-accent-100 py-12">
         <div className="section-container">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-white hover:opacity-80 transition-opacity mb-6"
+            className="inline-flex items-center gap-2 text-accent-500 hover:text-accent-700 transition-colors mb-6"
           >
             <ArrowLeft className="w-5 h-5" />
             Back to Home
           </Link>
 
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+          <h1 className="text-3xl sm:text-4xl font-bold text-accent-700 mb-6">
             Search
           </h1>
 
