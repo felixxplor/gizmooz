@@ -22,34 +22,36 @@ export function CartSummary({cart, layout}: CartMainProps) {
     );
   }, 0);
 
+  const isAside = layout === 'aside';
+
   return (
-    <div className="space-y-4">
+    <div className={isAside ? 'space-y-2' : 'space-y-4'}>
       {/* Free Shipping Banner */}
-      <div className="bg-accent-50 border border-accent-200 rounded-xl p-4 flex items-center gap-2">
+      <div className={`bg-accent-50 border border-accent-200 rounded-lg flex items-center gap-2 ${isAside ? 'px-3 py-2' : 'rounded-xl p-4'}`}>
         <Truck className="w-4 h-4 text-accent-600 shrink-0" />
-        <p className="text-sm font-semibold text-accent-700">
+        <p className={`font-semibold text-accent-700 ${isAside ? 'text-xs' : 'text-sm'}`}>
           Free shipping on your order!
         </p>
       </div>
 
       {/* Discount Code */}
-      <CartDiscounts discountCodes={cart.discountCodes} />
+      <CartDiscounts discountCodes={cart.discountCodes} layout={layout} />
 
       {/* Savings Banner */}
       {totalSaved > 0 && (
-        <div className="flex items-center gap-2 bg-accent-50 border border-accent-200 rounded-lg px-4 py-3">
-          <BadgePercent className="w-5 h-5 text-accent-600 shrink-0" />
-          <p className="text-sm font-semibold text-accent-700">
+        <div className={`flex items-center gap-2 bg-accent-50 border border-accent-200 rounded-lg ${isAside ? 'px-3 py-2' : 'px-4 py-3'}`}>
+          <BadgePercent className="w-4 h-4 text-accent-600 shrink-0" />
+          <p className={`font-semibold text-accent-700 ${isAside ? 'text-xs' : 'text-sm'}`}>
             You&apos;re saving ${totalSaved.toFixed(2)} on this order!
           </p>
         </div>
       )}
 
       {/* Order Summary */}
-      <div className="border border-brand-200 rounded-xl p-4 space-y-3">
-        <h3 className="font-bold text-brand-900">Order Summary</h3>
+      <div className={`border border-brand-200 rounded-xl space-y-2 ${isAside ? 'p-3' : 'p-4 space-y-3'}`}>
+        <h3 className={`font-bold text-brand-900 ${isAside ? 'text-sm' : ''}`}>Order Summary</h3>
 
-        <div className="space-y-2 text-sm">
+        <div className="space-y-1.5 text-sm">
           <div className="flex justify-between">
             <span className="text-brand-500">Subtotal</span>
             {cart.cost?.subtotalAmount && (
@@ -79,12 +81,12 @@ export function CartSummary({cart, layout}: CartMainProps) {
           )}
         </div>
 
-        <div className="border-t border-brand-200 pt-3 flex justify-between items-center">
-          <span className="text-lg font-bold text-brand-900">Total</span>
+        <div className={`border-t border-brand-200 flex justify-between items-center ${isAside ? 'pt-2' : 'pt-3'}`}>
+          <span className={`font-bold text-brand-900 ${isAside ? 'text-base' : 'text-lg'}`}>Total</span>
           {cart.cost?.totalAmount && (
             <Money
               data={cart.cost.totalAmount}
-              className="text-xl font-bold text-brand-900"
+              className={`font-bold text-brand-900 ${isAside ? 'text-lg' : 'text-xl'}`}
             />
           )}
         </div>
@@ -93,42 +95,63 @@ export function CartSummary({cart, layout}: CartMainProps) {
       {/* Checkout Button */}
       <a
         href={cart.checkoutUrl}
-        className="flex items-center justify-center gap-2 w-full bg-accent-600 hover:bg-accent-700 text-white font-bold text-lg py-4 rounded-full transition-colors shadow-lg shadow-accent-200"
+        className={`flex items-center justify-center gap-2 w-full bg-accent-600 hover:bg-accent-700 text-white font-bold rounded-full transition-colors shadow-lg shadow-accent-200 ${isAside ? 'py-3 text-base' : 'py-4 text-lg'}`}
       >
         <Lock className="w-4 h-4 text-white" />
         <span className="text-white">Secure Checkout</span>
         <ArrowRight className="w-5 h-5 text-white" />
       </a>
-      <div className="text-center">
-        <a href="/cart" className="text-sm text-brand-500 hover:text-brand-700" style={{textDecoration: 'underline'}}>
+
+      <div className="flex items-center justify-between">
+        <a href="/cart" className="text-xs text-brand-500 hover:text-brand-700 underline">
           Go to cart
         </a>
+        {/* Trust Badges inline for aside */}
+        {isAside && (
+          <div className="flex items-center gap-3">
+            {[
+              {icon: Lock, label: 'SSL'},
+              {icon: RotateCcw, label: '30-Day'},
+              {icon: Truck, label: 'Fast'},
+            ].map(({icon: Icon, label}) => (
+              <div key={label} className="flex items-center gap-1 text-brand-400">
+                <Icon className="w-3 h-3" />
+                <span className="text-xs">{label}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Trust Badges */}
-      <div className="grid grid-cols-3 gap-2 pt-1">
-        {[
-          {icon: Lock, label: 'SSL Secure'},
-          {icon: RotateCcw, label: '30-Day Returns'},
-          {icon: Truck, label: 'Fast Delivery'},
-        ].map(({icon: Icon, label}) => (
-          <div key={label} className="flex flex-col items-center gap-1 text-center">
-            <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center">
-              <Icon className="w-4 h-4 text-brand-600" />
+      {/* Trust Badges — full grid for page layout only */}
+      {!isAside && (
+        <div className="grid grid-cols-3 gap-2 pt-1">
+          {[
+            {icon: Lock, label: 'SSL Secure'},
+            {icon: RotateCcw, label: '30-Day Returns'},
+            {icon: Truck, label: 'Fast Delivery'},
+          ].map(({icon: Icon, label}) => (
+            <div key={label} className="flex flex-col items-center gap-1 text-center">
+              <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center">
+                <Icon className="w-4 h-4 text-brand-600" />
+              </div>
+              <span className="text-xs text-brand-500">{label}</span>
             </div>
-            <span className="text-xs text-brand-500">{label}</span>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 function CartDiscounts({
   discountCodes,
+  layout,
 }: {
   discountCodes?: CartApiQueryFragment['discountCodes'];
+  layout: 'page' | 'aside';
 }) {
+  const isAside = layout === 'aside';
   const codes =
     discountCodes
       ?.filter((discount) => discount.applicable)
@@ -147,11 +170,11 @@ function CartDiscounts({
             name="discountCode"
             placeholder="Discount code"
             aria-label="Discount code"
-            className="flex-1 min-w-0 px-3 py-2.5 border-2 border-brand-200 rounded-lg focus:border-brand-900 focus:outline-none text-sm"
+            className={`flex-1 min-w-0 px-3 border-2 border-brand-200 rounded-lg focus:border-brand-900 focus:outline-none text-sm ${isAside ? 'py-1.5' : 'py-2.5'}`}
           />
           <button
             type="submit"
-            className="btn-secondary py-2.5 px-3 text-sm rounded-lg whitespace-nowrap shrink-0"
+            className={`btn-secondary px-3 text-sm rounded-lg whitespace-nowrap shrink-0 ${isAside ? 'py-1.5' : 'py-2.5'}`}
           >
             Apply
           </button>
