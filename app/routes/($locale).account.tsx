@@ -1,13 +1,12 @@
 import {
   data as remixData,
-  Form,
   NavLink,
   Outlet,
   useLoaderData,
 } from 'react-router';
 import type {Route} from './+types/account';
 import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
-import {User, Package, MapPin, LogOut, ChevronRight} from 'lucide-react';
+import {User, Package, MapPin, ChevronRight} from 'lucide-react';
 
 export function shouldRevalidate() {
   return true;
@@ -114,9 +113,9 @@ function AccountMenu() {
             {({isActive}) => (
               <>
                 <div className="flex items-center gap-3">
-                  <Icon className="w-5 h-5" />
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-white' : ''}`} />
                   <div>
-                    <p className="font-semibold">{item.label}</p>
+                    <p className={`font-semibold ${isActive ? 'text-white' : ''}`}>{item.label}</p>
                     <p
                       className={`text-xs ${isActive ? 'text-accent-100' : 'text-brand-400'}`}
                     >
@@ -124,29 +123,13 @@ function AccountMenu() {
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className={`w-5 h-5 ${isActive ? 'text-white' : ''}`} />
               </>
             )}
           </NavLink>
         );
       })}
 
-      {/* Logout */}
-      <Form method="POST" action="/account/logout">
-        <button
-          type="submit"
-          className="w-full flex items-center justify-between p-4 rounded-lg bg-white text-brand-600 hover:bg-red-50 hover:text-error transition-all"
-        >
-          <div className="flex items-center gap-3">
-            <LogOut className="w-5 h-5" />
-            <div>
-              <p className="font-semibold">Sign Out</p>
-              <p className="text-xs text-brand-400">Logout from account</p>
-            </div>
-          </div>
-          <ChevronRight className="w-5 h-5" />
-        </button>
-      </Form>
     </nav>
   );
 }

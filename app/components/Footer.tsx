@@ -1,5 +1,5 @@
-import {Suspense} from 'react';
-import {Await, NavLink, Form} from 'react-router';
+import {Suspense, useEffect, useRef} from 'react';
+import {Await, NavLink, useFetcher} from 'react-router';
 import type {FooterQuery, HeaderQuery} from 'storefrontapi.generated';
 import {Facebook, Twitter, Youtube, Instagram} from 'lucide-react';
 import logo from '~/assets/logo.svg';
@@ -34,26 +34,7 @@ export function Footer({
                     </p>
                   </div>
                   <div className="w-full md:w-auto">
-                    <Form
-                      method="post"
-                      action="/newsletter"
-                      className="flex items-center bg-white rounded-full p-1.5 pl-4 sm:pl-6"
-                    >
-                      <input
-                        type="email"
-                        name="email"
-                        placeholder="Enter your email address"
-                        required
-                        aria-label="Email address"
-                        className="flex-1 py-1.5 sm:py-2 text-sm text-brand-900 placeholder-brand-400 outline-none bg-transparent ring-0 shadow-none min-w-0 sm:min-w-52 !border-0 !rounded-none !m-0 !p-0"
-                      />
-                      <button
-                        type="submit"
-                        className="px-4 sm:px-6 py-2 sm:py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold uppercase tracking-wide rounded-full transition-colors whitespace-nowrap"
-                      >
-                        Subscribe
-                      </button>
-                    </Form>
+                    <NewsletterForm />
                   </div>
                 </div>
               </div>
@@ -225,6 +206,33 @@ export function Footer({
                           Share Your Story
                         </NavLink>
                       </li>
+                      <li>
+                        <NavLink
+                          to="/pages/terms"
+                          prefetch="intent"
+                          className="text-brand-500 hover:text-brand-900 transition-colors"
+                        >
+                          Terms &amp; Conditions
+                        </NavLink>
+                      </li>
+                      <li>
+                        <NavLink
+                          to="/pages/privacy"
+                          prefetch="intent"
+                          className="text-brand-500 hover:text-brand-900 transition-colors"
+                        >
+                          Privacy Policy
+                        </NavLink>
+                      </li>
+                      <li>
+                        <NavLink
+                          to="/pages/returns"
+                          prefetch="intent"
+                          className="text-brand-500 hover:text-brand-900 transition-colors"
+                        >
+                          Return Policy
+                        </NavLink>
+                      </li>
                     </ul>
                   </div>
 
@@ -234,6 +242,15 @@ export function Footer({
                       Support
                     </h4>
                     <ul className="space-y-2 sm:space-y-2.5 text-xs sm:text-sm">
+                      <li>
+                        <NavLink
+                          to="/pages/faq"
+                          prefetch="intent"
+                          className="text-brand-500 hover:text-brand-900 transition-colors"
+                        >
+                          FAQ
+                        </NavLink>
+                      </li>
                       <li>
                         <NavLink
                           to="/pages/help"
@@ -554,6 +571,29 @@ export function Footer({
                     Copyright © {new Date().getFullYear()} Gizmody. All Rights
                     Reserved
                   </p>
+                  <div className="flex items-center gap-4">
+                    <NavLink
+                      to="/pages/terms"
+                      prefetch="intent"
+                      className="hover:text-brand-900 transition-colors"
+                    >
+                      Terms &amp; Conditions
+                    </NavLink>
+                    <NavLink
+                      to="/pages/privacy"
+                      prefetch="intent"
+                      className="hover:text-brand-900 transition-colors"
+                    >
+                      Privacy Policy
+                    </NavLink>
+                    <NavLink
+                      to="/pages/returns"
+                      prefetch="intent"
+                      className="hover:text-brand-900 transition-colors"
+                    >
+                      Return Policy
+                    </NavLink>
+                  </div>
                 </div>
               </div>
             </div>
@@ -615,6 +655,52 @@ function FooterMenu({
         );
       })}
     </>
+  );
+}
+
+function NewsletterForm() {
+  const fetcher = useFetcher<{success?: boolean; message?: string; error?: string}>();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isSubmitting = fetcher.state !== 'idle';
+  const result = fetcher.data;
+
+  useEffect(() => {
+    if (result?.success && inputRef.current) {
+      inputRef.current.value = '';
+    }
+  }, [result]);
+
+  return (
+    <div className="w-full md:w-auto">
+      <fetcher.Form
+        method="post"
+        action="/newsletter"
+        className="flex items-center bg-white rounded-full p-1.5 pl-4 sm:pl-6"
+      >
+        <input
+          ref={inputRef}
+          type="email"
+          name="email"
+          placeholder="Enter your email address"
+          required
+          aria-label="Email address"
+          className="flex-1 py-1.5 sm:py-2 text-sm text-brand-900 placeholder-brand-400 outline-none bg-transparent ring-0 shadow-none min-w-0 sm:min-w-52 !border-0 !rounded-none !m-0 !p-0"
+        />
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="px-4 sm:px-6 py-2 sm:py-2.5 bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white text-xs sm:text-sm font-semibold uppercase tracking-wide rounded-full transition-colors whitespace-nowrap"
+        >
+          {isSubmitting ? 'Subscribing...' : 'Subscribe'}
+        </button>
+      </fetcher.Form>
+      {result?.success && (
+        <p className="mt-2 text-xs text-success text-center">{result.message}</p>
+      )}
+      {result?.error && (
+        <p className="mt-2 text-xs text-error text-center">{result.error}</p>
+      )}
+    </div>
   );
 }
 

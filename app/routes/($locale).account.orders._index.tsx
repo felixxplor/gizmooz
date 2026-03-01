@@ -78,15 +78,15 @@ export default function Orders() {
       {/* Header */}
       <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-accent-100 flex items-center justify-center">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-12 h-12 shrink-0 rounded-full bg-accent-100 flex items-center justify-center">
               <Package className="w-6 h-6 text-accent-600" />
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-brand-900">
+            <div className="min-w-0">
+              <h2 className="text-2xl font-bold text-brand-900 whitespace-nowrap">
                 Order History
               </h2>
-              <p className="text-sm text-brand-600">
+              <p className="text-sm text-brand-600 whitespace-nowrap">
                 View and track your orders
               </p>
             </div>
@@ -96,9 +96,9 @@ export default function Orders() {
           <Form method="POST" action="/account/logout">
             <button
               type="submit"
-              className="flex items-center gap-2 px-4 py-2 border-2 border-brand-300 rounded-lg hover:border-red-600 hover:text-red-600 hover:bg-red-50 transition-all font-semibold"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 rounded-lg transition-all whitespace-nowrap shrink-0"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-3.5 h-3.5" />
               Sign Out
             </button>
           </Form>
@@ -168,7 +168,7 @@ function EmptyOrders({hasFilters = false}: {hasFilters?: boolean}) {
           </p>
           <Link
             to="/collections/all"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-accent-600 hover:bg-accent-700 text-white font-semibold rounded-lg transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-accent-600 hover:bg-accent-700 text-white font-semibold rounded-lg transition-all [&>svg]:text-white"
           >
             <ShoppingBag className="w-5 h-5" />
             Start Shopping
