@@ -82,19 +82,17 @@ export function ProductCard({product, loading}: ProductCardProps) {
             {product.title}
           </h3>
 
-          {reviewCount > 0 && (
-            <div className="flex items-center gap-1.5 mb-2">
-              <div className="flex items-center gap-0.5">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <Star
-                    key={n}
-                    className={`w-3.5 h-3.5 ${n <= Math.round(reviewAverage) ? 'fill-amber-400 text-amber-400' : 'text-brand-200'}`}
-                  />
-                ))}
-              </div>
-              <span className="text-xs text-brand-500">({reviewCount})</span>
+          <div className={`flex items-center gap-1.5 mb-2 ${reviewCount === 0 ? 'invisible' : ''}`}>
+            <div className="flex items-center gap-0.5">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <Star
+                  key={n}
+                  className={`w-3.5 h-3.5 ${n <= Math.round(reviewAverage) ? 'fill-amber-400 text-amber-400' : 'text-brand-200'}`}
+                />
+              ))}
             </div>
-          )}
+            <span className="text-xs text-brand-500">({reviewCount})</span>
+          </div>
 
           <div className="flex items-center gap-2 flex-wrap">
             <Money

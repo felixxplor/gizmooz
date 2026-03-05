@@ -1,46 +1,22 @@
 import {useState} from 'react';
 import {ChevronDown} from 'lucide-react';
 
+interface Spec {
+  label: string;
+  value: string;
+}
+
+interface FaqItem {
+  q: string;
+  a: string;
+}
+
 interface ProductTabsProps {
   description: string;
   descriptionHtml: string;
+  specifications: Spec[] | null;
+  faq: FaqItem[] | null;
 }
-
-const SPECS = [
-  {label: 'Dimensions', value: '8 × 8 × 8 cm'},
-  {label: 'Weight', value: '280 g'},
-  {label: 'Material', value: 'Optical-grade crystal acrylic'},
-  {label: 'Power', value: 'USB-C, 5V / 1A'},
-  {label: 'Colors', value: '16 million RGB'},
-  {label: 'Brightness Levels', value: '6 levels'},
-  {label: 'Light Modes', value: 'Static, Breathing, Colour Cycle'},
-  {label: 'Remote', value: 'Included (IR, 2× AAA batteries)'},
-  {label: 'Cable Length', value: '1.2 m USB-C cable included'},
-  {label: 'Compatibility', value: 'Any USB-A/C power source (≥5W)'},
-];
-
-const FAQS = [
-  {
-    q: 'How long does shipping take?',
-    a: 'Orders are dispatched within 1–2 business days. Standard Australian shipping takes 3–7 business days. Express options are available at checkout.',
-  },
-  {
-    q: 'Can I use it with a power bank?',
-    a: 'Yes — any USB power bank with at least a 5W output will work. The lamp draws less than 5W so it\'s great for travel or areas without a nearby outlet.',
-  },
-  {
-    q: 'What is your return policy?',
-    a: 'We offer a 30-day change-of-mind return. Simply contact us and we\'ll arrange a prepaid return label. Items must be in original packaging.',
-  },
-  {
-    q: 'Is the lamp safe to leave on overnight?',
-    a: 'Yes. The LED base runs cool to the touch and has no fire risk. The lamp does not include an auto-off timer, so we recommend using a smart plug if you want scheduled shutdowns.',
-  },
-  {
-    q: 'Does it come with a warranty?',
-    a: 'All Gizmody products include a 1-year manufacturer\'s warranty covering defects in materials and workmanship.',
-  },
-];
 
 type Tab = 'description' | 'specs' | 'faq';
 
@@ -65,13 +41,13 @@ function FaqItem({q, a}: {q: string; a: string}) {
   );
 }
 
-export function ProductTabs({description, descriptionHtml}: ProductTabsProps) {
-  const [activeTab, setActiveTab] = useState<Tab>('description');
+export function ProductTabs({description, descriptionHtml, specifications, faq}: ProductTabsProps) {
+const [activeTab, setActiveTab] = useState<Tab>('description');
 
   const tabs: {id: Tab; label: string}[] = [
     {id: 'description', label: 'Description'},
-    {id: 'specs', label: 'Specifications'},
-    {id: 'faq', label: 'FAQ'},
+    ...(specifications?.length ? [{id: 'specs' as Tab, label: 'Specifications'}] : []),
+    ...(faq?.length ? [{id: 'faq' as Tab, label: 'FAQ'}] : []),
   ];
 
   return (
@@ -114,7 +90,7 @@ export function ProductTabs({description, descriptionHtml}: ProductTabsProps) {
           />
         )}
 
-        {activeTab === 'specs' && (
+        {activeTab === 'specs' && specifications?.length && (
           <div
             id="panel-specs"
             role="tabpanel"
@@ -123,7 +99,7 @@ export function ProductTabs({description, descriptionHtml}: ProductTabsProps) {
           >
             <table className="w-full text-sm">
               <tbody>
-                {SPECS.map(({label, value}, i) => (
+                {specifications.map(({label, value}, i) => (
                   <tr
                     key={label}
                     className={i % 2 === 0 ? 'bg-brand-50' : 'bg-white'}
@@ -141,14 +117,14 @@ export function ProductTabs({description, descriptionHtml}: ProductTabsProps) {
           </div>
         )}
 
-        {activeTab === 'faq' && (
+        {activeTab === 'faq' && faq?.length && (
           <div
             id="panel-faq"
             role="tabpanel"
             aria-labelledby="tab-faq"
             className="max-w-2xl"
           >
-            {FAQS.map((item) => (
+            {faq.map((item) => (
               <FaqItem key={item.q} q={item.q} a={item.a} />
             ))}
           </div>

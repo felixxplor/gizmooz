@@ -25,15 +25,17 @@ export function CartEmpty({hidden, layout}: CartEmptyProps) {
         Looks like you haven&apos;t added anything yet. Let&apos;s get you started!
       </p>
 
-      <Link
-        to="/collections/all"
-        onClick={layout === 'aside' ? close : undefined}
-        prefetch="viewport"
-        className="btn-primary px-8 py-4"
-      >
-        Continue Shopping
-        <ArrowRight className="w-5 h-5" />
-      </Link>
+      {layout === 'aside' ? (
+        <button onClick={close} className="btn-primary px-8 py-4">
+          Continue Shopping
+          <ArrowRight className="w-5 h-5" />
+        </button>
+      ) : (
+        <Link to="/collections/all" prefetch="viewport" className="btn-primary px-8 py-4">
+          Continue Shopping
+          <ArrowRight className="w-5 h-5" />
+        </Link>
+      )}
     </div>
   );
 }

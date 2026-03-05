@@ -19,7 +19,7 @@ import {ProductReviews} from '~/components/product/ProductReviews';
 import {RecommendedProducts} from '~/components/RecommendedProducts';
 import {Link} from 'react-router';
 import {ProductForm} from '~/components/ProductForm';
-import {Store, RotateCcw, Plus, Minus} from 'lucide-react';
+import {Store, RotateCcw, Plus, Minus, Star} from 'lucide-react';
 import {CartForm, Money, Image} from '@shopify/hydrogen';
 import type {CurrencyCode} from '@shopify/hydrogen/storefront-api-types';
 import {useAside} from '~/components/Aside';
@@ -105,13 +105,24 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 
   const reviews = parseMetaobjectReviews(product);
 
-  return {product, reviews};
+  function parseJsonMetafield(value: string | undefined | null) {
+    if (!value) return null;
+    try { return JSON.parse(value); } catch { return null; }
+  }
+
+const features = parseJsonMetafield((product as any).features?.value) as any[] | null;
+  const faq = parseJsonMetafield((product as any).faq?.value) as any[] | null;
+  const specifications = parseJsonMetafield((product as any).specifications?.value) as any[] | null;
+
+  return {product, reviews, features, faq, specifications};
 }
 
 function loadDeferredData({context}: Route.LoaderArgs, productId: string) {
   const recommendedProducts = context.storefront
     .query(RECOMMENDED_PRODUCTS_QUERY, {variables: {productId}})
-    .then((data: any) => ({products: {nodes: data?.productRecommendations ?? []}}))
+    .then((data: any) => ({
+      products: {nodes: data?.productRecommendations ?? []},
+    }))
     .catch((error: Error) => {
       console.error(error);
       return null;
@@ -123,7 +134,7 @@ function loadDeferredData({context}: Route.LoaderArgs, productId: string) {
 }
 
 export default function Product() {
-  const {product, recommendedProducts, reviews} =
+  const {product, recommendedProducts, reviews, features, faq, specifications} =
     useLoaderData<typeof loader>();
   const [quantity, setQuantity] = useState(1);
 
@@ -197,6 +208,8 @@ export default function Product() {
               reviewCount={reviews?.total}
             />
 
+            <ProductFeatureHighlights features={features} />
+
             <div className="mt-8 space-y-8">
               <ProductForm
                 productOptions={productOptions}
@@ -207,6 +220,14 @@ export default function Product() {
 
               {/* Shipping & Returns */}
               <div className="space-y-4 border-t border-brand-200 pt-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded bg-brand-100 flex items-center justify-center flex-shrink-0">
+                    <Star className="w-4 h-4 text-brand-900" />
+                  </div>
+                  <p className="text-sm font-semibold text-brand-900">
+                    Proudly Australian owned
+                  </p>
+                </div>
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded bg-brand-100 flex items-center justify-center flex-shrink-0">
                     <Store className="w-4 h-4 text-brand-900" />
@@ -221,7 +242,7 @@ export default function Product() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-brand-900">
-                      30 day change of mind returns.
+                      30 day change of mind returns
                     </p>
                   </div>
                 </div>
@@ -265,7 +286,6 @@ export default function Product() {
                 </div>
               </div>
 
-              <ProductFeatureHighlights />
             </div>
           </div>
         </div>
@@ -274,6 +294,8 @@ export default function Product() {
         <ProductTabs
           description={product.description || ''}
           descriptionHtml={product.descriptionHtml}
+          specifications={specifications}
+          faq={faq}
         />
       </div>
 
@@ -314,13 +336,21 @@ export default function Product() {
 }
 
 type StickyProduct = {title: string};
-type StickyVariant = {
-  id: string;
-  title: string;
-  availableForSale: boolean;
-  price: {amount: string; currencyCode: CurrencyCode};
-  image?: {url: string; altText?: string | null; width?: number | null; height?: number | null} | null;
-} | null | undefined;
+type StickyVariant =
+  | {
+      id: string;
+      title: string;
+      availableForSale: boolean;
+      price: {amount: string; currencyCode: CurrencyCode};
+      image?: {
+        url: string;
+        altText?: string | null;
+        width?: number | null;
+        height?: number | null;
+      } | null;
+    }
+  | null
+  | undefined;
 
 function StickyAddToCart({
   product,
@@ -401,7 +431,9 @@ function StickyAddToCart({
           route="/cart"
           action={CartForm.ACTIONS.LinesAdd}
           inputs={{
-            lines: [{merchandiseId: selectedVariant.id, quantity, selectedVariant}],
+            lines: [
+              {merchandiseId: selectedVariant.id, quantity, selectedVariant},
+            ],
           }}
         >
           {(fetcher) => {
@@ -535,6 +567,15 @@ const PRODUCT_FRAGMENT = `#graphql
           }
         }
       }
+    }
+    features: metafield(namespace: "custom", key: "features") {
+      value
+    }
+    faq: metafield(namespace: "custom", key: "faq") {
+      value
+    }
+    specifications: metafield(namespace: "custom", key: "specifications") {
+      value
     }
   }
   ${PRODUCT_VARIANT_FRAGMENT}

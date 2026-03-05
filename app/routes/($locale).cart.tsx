@@ -197,6 +197,19 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
         }
       }
     }
+    metafield(namespace: "custom", key: "reviews") {
+      references(first: 20) {
+        nodes {
+          ... on Metaobject {
+            id
+            fields {
+              key
+              value
+            }
+          }
+        }
+      }
+    }
   }
   query CartRecommendedProducts ($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {
