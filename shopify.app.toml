@@ -4,7 +4,7 @@ application_url = "https://example.com"
 embedded = true
 
 [access_scopes]
-scopes = "write_metaobjects,read_metaobjects,write_files,read_files,write_products,read_products"
+scopes = "write_metaobjects,read_metaobjects,write_files,read_files,write_products,read_products,write_customers,read_customers"
 
 [auth]
 redirect_urls = ["https://example.com/auth/callback"]

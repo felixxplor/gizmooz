@@ -71,24 +71,6 @@ export function Footer({
                         <Facebook className="w-5 h-5" />
                       </a>
                       <a
-                        href="https://twitter.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="Twitter"
-                        className="w-10 h-10 rounded-full bg-brand-200 hover:bg-brand-900 hover:text-white text-brand-600 flex items-center justify-center transition-colors"
-                      >
-                        <Twitter className="w-5 h-5" />
-                      </a>
-                      <a
-                        href="https://youtube.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="YouTube"
-                        className="w-10 h-10 rounded-full bg-brand-200 hover:bg-brand-900 hover:text-white text-brand-600 flex items-center justify-center transition-colors"
-                      >
-                        <Youtube className="w-5 h-5" />
-                      </a>
-                      <a
                         href="https://instagram.com"
                         target="_blank"
                         rel="noopener noreferrer"
@@ -141,16 +123,6 @@ export function Footer({
                             Wearables
                           </NavLink>
                         </li>
-                        <li>
-                          <NavLink
-                            to="/collections/audio"
-                            prefetch="intent"
-                            className="text-brand-500 hover:text-brand-900 transition-colors"
-                          >
-                            Audio
-                          </NavLink>
-                        </li>
-
                         <li>
                           <NavLink
                             to="/collections/accessories"
@@ -232,15 +204,7 @@ export function Footer({
                             FAQ
                           </NavLink>
                         </li>
-                        <li>
-                          <NavLink
-                            to="/pages/help"
-                            prefetch="intent"
-                            className="text-brand-500 hover:text-brand-900 transition-colors"
-                          >
-                            Help Center
-                          </NavLink>
-                        </li>
+
                         <li>
                           <NavLink
                             to="/pages/tracking"

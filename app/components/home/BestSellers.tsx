@@ -105,7 +105,7 @@ function BestSellerCard({product}: {product: any}) {
   const {average: reviewAverage, count: reviewCount} = getReviewStats(product);
 
   return (
-    <div className="flex-shrink-0 w-[260px] sm:w-[280px] group">
+    <div className="flex-shrink-0 w-[260px] sm:w-[280px] group flex flex-col">
       {/* Image */}
       <Link to={`/products/${product.handle}`} prefetch="intent">
         <div className="relative aspect-square bg-brand-50 rounded-lg overflow-hidden mb-3">
@@ -125,7 +125,7 @@ function BestSellerCard({product}: {product: any}) {
       </Link>
 
       {/* Info */}
-      <div className="space-y-2">
+      <div className="flex flex-col flex-1 gap-2">
         <div className="flex items-start justify-between gap-2">
           <Link
             to={`/products/${product.handle}`}
@@ -150,21 +150,20 @@ function BestSellerCard({product}: {product: any}) {
           </div>
         </div>
 
-        {reviewCount > 0 && (
-          <div className="flex items-center gap-1.5">
-            <div className="flex items-center gap-0.5">
-              {[1, 2, 3, 4, 5].map((n) => (
-                <Star
-                  key={n}
-                  className={`w-3.5 h-3.5 ${n <= Math.round(reviewAverage) ? 'fill-amber-400 text-amber-400' : 'text-brand-200'}`}
-                />
-              ))}
-            </div>
-            <span className="text-xs text-brand-500">({reviewCount})</span>
+        <div className={`flex items-center gap-1.5 ${reviewCount === 0 ? 'invisible' : ''}`}>
+          <div className="flex items-center gap-0.5">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <Star
+                key={n}
+                className={`w-3.5 h-3.5 ${n <= Math.round(reviewAverage) ? 'fill-amber-400 text-amber-400' : 'text-brand-200'}`}
+              />
+            ))}
           </div>
-        )}
+          <span className="text-xs text-brand-500">({reviewCount})</span>
+        </div>
 
         {/* Add to Cart */}
+        <div className="mt-auto">
         {firstVariant ? (
           <AddToCartButton
             lines={[
@@ -187,6 +186,7 @@ function BestSellerCard({product}: {product: any}) {
             View Product
           </Link>
         )}
+        </div>
       </div>
     </div>
   );
