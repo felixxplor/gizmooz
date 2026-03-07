@@ -94,7 +94,8 @@ export async function action({request, context}: ActionFunctionArgs) {
       env.SHOPIFY_API_KEY,
       env.SHOPIFY_API_SECRET,
     );
-  } catch {
+  } catch (e) {
+    console.error('Newsletter token error:', e);
     return Response.json(
       {error: 'Something went wrong. Please try again.'},
       {status: 500},

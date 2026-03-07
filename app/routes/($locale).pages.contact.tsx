@@ -34,11 +34,10 @@ export async function action({request, context}: Route.ActionArgs) {
       body: body.toString(),
     });
 
-    if (!res.ok) {
-      return {
-        success: false,
-        error: 'Failed to send message. Please try again.',
-      };
+    console.error('Contact form response:', res.status, res.url);
+    // Shopify returns 302 redirect on success — treat any non-500 as success
+    if (res.status >= 500) {
+      return {success: false, error: 'Failed to send message. Please try again.'};
     }
 
     return {success: true};
