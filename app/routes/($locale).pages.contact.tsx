@@ -18,25 +18,70 @@ export async function action({request, context}: Route.ActionArgs) {
     return {success: false, error: 'All fields are required.'};
   }
 
-  const storeDomain = context.env.PUBLIC_STORE_DOMAIN;
+  const {env} = context;
 
   try {
-    const body = new URLSearchParams();
-    body.append('form_type', 'contact');
-    body.append('utf8', '✓');
-    body.append('contact[name]', name);
-    body.append('contact[email]', email);
-    body.append('contact[body]', `Subject: ${subject}\n\n${message}`);
+    // Get admin token — same pattern as api.reviews.tsx
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const tokenRes = await fetch(
+      `https://${env.PUBLIC_STORE_DOMAIN}/admin/oauth/access_token`,
+      {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: new URLSearchParams({
+          client_id: env.SHOPIFY_API_KEY,
+          client_secret: env.SHOPIFY_API_SECRET,
+          grant_type: 'client_credentials',
+        }),
+      },
+    );
 
-    const res = await fetch(`https://${storeDomain}/contact`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: body.toString(),
-    });
+    if (!tokenRes.ok) {
+      console.error('Contact token error:', tokenRes.status);
+      return {success: false, error: 'Failed to send message. Please try again.'};
+    }
 
-    console.error('Contact form response:', res.status, res.url);
-    // Shopify returns 302 redirect on success — treat any non-500 as success
-    if (res.status >= 500) {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const {access_token} = (await tokenRes.json()) as {access_token: string};
+
+    // Store as metaobject — uses write_metaobjects scope (already working for reviews)
+    const gqlRes = await fetch(
+      `https://${env.PUBLIC_STORE_DOMAIN}/admin/api/2026-01/graphql.json`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Shopify-Access-Token': access_token,
+        },
+        body: JSON.stringify({
+          query: `mutation MetaobjectCreate($metaobject: MetaobjectCreateInput!) {
+            metaobjectCreate(metaobject: $metaobject) {
+              metaobject { id }
+              userErrors { field message }
+            }
+          }`,
+          variables: {
+            metaobject: {
+              type: 'contact_message',
+              fields: [
+                {key: 'name', value: name},
+                {key: 'email', value: email},
+                {key: 'subject', value: subject},
+                {key: 'message', value: message},
+                {key: 'submitted_at', value: new Date().toISOString()},
+              ],
+            },
+          },
+        }),
+      },
+    );
+
+    const data = (await gqlRes.json()) as {
+      errors?: {message: string}[];
+      data?: {metaobjectCreate?: {metaobject?: {id: string}; userErrors?: {field: string; message: string}[]}};
+    };
+    if (data?.errors?.length || data?.data?.metaobjectCreate?.userErrors?.length) {
+      console.error('Contact metaobject error:', JSON.stringify(data?.errors ?? data?.data?.metaobjectCreate?.userErrors));
       return {success: false, error: 'Failed to send message. Please try again.'};
     }
 
@@ -90,7 +135,7 @@ export default function ContactPage() {
                   Message Sent!
                 </h3>
                 <p className="text-brand-500 max-w-sm">
-                  Thanks for reaching out. We'll get back to you within 1
+                  Thanks for reaching out. We&apos;ll get back to you within 1
                   business day.
                 </p>
               </div>
