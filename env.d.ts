@@ -10,5 +10,7 @@ declare global {
   interface Env {
     SHOPIFY_API_KEY: string;
     SHOPIFY_API_SECRET: string;
+    KLAVIYO_PRIVATE_API_KEY: string;
+    KLAVIYO_LIST_ID: string;
   }
 }

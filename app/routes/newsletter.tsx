@@ -15,8 +15,39 @@ export async function action({request, context}: ActionFunctionArgs) {
   const {env} = context;
 
   try {
-    const res = await fetch(
-      'https://a.klaviyo.com/api/profile-subscription-bulk-create-jobs/',
+    // Step 1: Create or update profile
+    const profileRes = await fetch('https://a.klaviyo.com/api/profiles/', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Klaviyo-API-Key ${env.KLAVIYO_PRIVATE_API_KEY}`,
+        'Content-Type': 'application/json',
+        'revision': '2024-10-15',
+      },
+      body: JSON.stringify({
+        data: {
+          type: 'profile',
+          attributes: {email},
+        },
+      }),
+    });
+
+    let profileId: string;
+    if (profileRes.status === 409) {
+      // Profile already exists — extract id from conflict response
+      const conflict = await profileRes.json() as {errors?: [{meta?: {duplicate_profile_id?: string}}]};
+      profileId = conflict.errors?.[0]?.meta?.duplicate_profile_id ?? '';
+    } else if (profileRes.ok) {
+      const profileData = await profileRes.json() as {data?: {id?: string}};
+      profileId = profileData.data?.id ?? '';
+    } else {
+      const body = await profileRes.text();
+      console.error('Klaviyo profile error:', profileRes.status, body);
+      return Response.json({error: 'Failed to subscribe. Please try again.'}, {status: 500});
+    }
+
+    // Step 2: Add profile to list
+    const listRes = await fetch(
+      `https://a.klaviyo.com/api/lists/${env.KLAVIYO_LIST_ID}/relationships/profiles/`,
       {
         method: 'POST',
         headers: {
@@ -25,32 +56,14 @@ export async function action({request, context}: ActionFunctionArgs) {
           'revision': '2024-10-15',
         },
         body: JSON.stringify({
-          data: {
-            type: 'profile-subscription-bulk-create-job',
-            attributes: {
-              profiles: {
-                data: [
-                  {
-                    type: 'profile',
-                    attributes: {
-                      email,
-                      subscriptions: {
-                        email: {marketing: {consent: 'SUBSCRIBED'}},
-                      },
-                    },
-                  },
-                ],
-              },
-              list_id: env.KLAVIYO_LIST_ID,
-            },
-          },
+          data: [{type: 'profile', id: profileId}],
         }),
       },
     );
 
-    if (!res.ok && res.status !== 202) {
-      const body = await res.text();
-      console.error('Klaviyo error:', res.status, body);
+    if (!listRes.ok && listRes.status !== 204) {
+      const body = await listRes.text();
+      console.error('Klaviyo list error:', listRes.status, body);
       return Response.json({error: 'Failed to subscribe. Please try again.'}, {status: 500});
     }
 
